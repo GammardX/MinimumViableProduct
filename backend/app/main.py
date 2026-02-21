@@ -5,7 +5,7 @@ from app.llm.parser import extract_json
 from app.llm.prompts import (improve_prompt, six_hats_prompt, summarize_prompt,
                              translate_prompt)
 from app.llm.schemas import LLMResponse
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -34,21 +34,27 @@ app.add_middleware(
 
 async def run_llm_request(messages: list[dict]):
     try:
-        raw = await call_llm(
-            messages, 
-            settings.LLM_API_URL,
-            settings.LLM_MODEL,
-            settings.LLM_API_KEY,
-        )
-    except Exception as e:
-        print(f"Primary LLM failed: {e}. Switching to fallback.")
-        raw = await call_llm(
-            messages, 
-            "http://padova.zucchetti.it:14000/v1/chat/completions",
-            "gpt-oss:20b",
-            settings.LLM_API_KEY,
-        )
-    return extract_json(raw)
+        try:
+            raw = await call_llm(
+                messages, 
+                settings.LLM_API_URL,
+                settings.LLM_MODEL,
+                settings.LLM_API_KEY,
+            )
+        except Exception as e:
+            print(f"Primary LLM local failed: {e}. Switching to fallback.")
+            raw = await call_llm(
+                messages, 
+                "http://padova.zucchetti.it:14000/v1/chat/completions",
+                "gpt-oss:20b",
+                settings.LLM_API_KEY,
+            )
+        
+        return extract_json(raw)
+
+    except Exception as global_e:
+        print(f"Errore critico durante la chiamata LLM: {global_e}")
+        raise HTTPException(status_code=400, detail=f"Errore del servizio AI: {str(global_e)}")
 
 # ENDPOINTS
 
