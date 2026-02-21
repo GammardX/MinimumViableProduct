@@ -26,6 +26,26 @@ const WELCOME_NOTE: Note = {
 
 const DB_KEY = 'my-markdown-notes';
 
+const getPreviewStats = (markdown: string) => {
+    if (!markdown) return { words: 0, chars: 0 };
+    
+    const plainText = markdown
+        .replace(/#+\s/g, '') 
+        .replace(/(\*\*|__)(.*?)\1/g, '$2') 
+        .replace(/(\*|_)(.*?)\1/g, '$2') 
+        .replace(/~~(.*?)~~/g, '$1')
+        .replace(/!\[.*?\]\(.*?\)/g, '') 
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/`{1,3}([^`]+)`{1,3}/g, '$1') 
+        .replace(/^\s*[>\-\*\+]\s+/gm, '') 
+        .replace(/^\s*\d+\.\s+/gm, '');
+
+    const chars = plainText.length;
+    const words = plainText.trim().split(/\s+/).filter(w => w.length > 0).length;
+
+    return { words, chars };
+};
+
 export default function App() {
     // --- RISVEGLIO SERVER ---
     useEffect(() => {
@@ -249,7 +269,6 @@ export default function App() {
                 }, 200);
             }
         } else {
-            // Al posto di alert(...), apriamo la snackbar di errore
             setSnackbar({ 
                 open: true, 
                 message: `Nota "${decodedTarget}" non trovata!`, 
@@ -327,13 +346,18 @@ export default function App() {
                             />
                         </div>
                         
-                        {/* --- NUOVA STATUS BAR --- */}
-                        <div 
-                            className="status-bar" 
-                            onClick={handleCopyInternalLink}
-                            title="Clicca per copiare il link interno per questa nota"
-                        >
-                            <span>ID Nota: {activeNote.id}</span>
+                        {/* --- STATUS BAR --- */}
+                        <div className="status-bar">
+                            <div className="status-left">
+                                {getPreviewStats(activeNote.content).words} parole | {getPreviewStats(activeNote.content).chars} caratteri
+                            </div>
+                            <div 
+                                className="status-right" 
+                                onClick={handleCopyInternalLink}
+                                title="Clicca per copiare il link interno per questa nota"
+                            >
+                                <span>ID Nota: {activeNote.id}</span>
+                            </div>
                         </div>
                     </>
                 ) : (
@@ -355,7 +379,6 @@ export default function App() {
                 )}
             </div>
 
-            {/* FEEDBACK SNACKBAR UNIFICATA */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}

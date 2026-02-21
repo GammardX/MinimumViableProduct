@@ -72,38 +72,27 @@ body {
     font-size: 12px;
     padding: 4px 16px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; 
     align-items: center;
+    user-select: none;
+    border-top: 1px solid var(--border-color); 
+}
+
+.status-left {
+    opacity: 0.8;
+}
+
+.status-right {
     cursor: pointer;
-    user-select: none;
+    padding: 2px 6px;
+    border-radius: 4px;
     transition: background-color 0.2s;
-}
-
-.status-bar:hover {
-    background-color: var(--border-color);
-}
-
-.dialog-loading-container {
     display: flex;
-    gap: 12px;
     align-items: center;
 }
 
-.dialog-text-pre {
-    white-space: pre-wrap;
-}
-
-.app-container.is-resizing {
-    user-select: none;
-    cursor: col-resize;
-}
-
-.resizer.active {
-    background-color: var(--accent-color);
-}
-
-.empty-state-btn {
-    margin-top: 1rem;
+.status-right:hover {
+    background-color: var(--border-color);
 }
 
 /* --- EMPTY STATE DASHBOARD --- */
@@ -176,3 +165,4 @@ body {
 .empty-state-secondary-btn:hover { 
     background: rgba(59, 130, 246, 0.05); 
 }
+
