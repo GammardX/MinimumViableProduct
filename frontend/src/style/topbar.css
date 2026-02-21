@@ -1,0 +1,41 @@
+.top-bar {
+    height: 60px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    background: white;
+    z-index: 10;
+}
+
+.top-bar h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.top-bar .actions button {
+    margin-left: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.top-bar .actions button:hover {
+    background: #f3f4f6;
+}
+
+.hat-color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.hat-border-white {
+    border: 1px solid #ccc;
+}

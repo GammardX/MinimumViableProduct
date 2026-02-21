@@ -1,0 +1,232 @@
+/* =========================================
+   1. LAYOUT ED EDITOR CONTAINER
+   ========================================= */
+.EasyMDEContainer {
+	position: absolute !important;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: white;
+	display: grid !important;
+	grid-template-rows: max-content 1fr;
+	grid-template-columns: 1fr 1fr;
+	height: 100% !important;
+}
+
+.editor-toolbar {
+	grid-row: 1;
+	grid-column: 1 / -1;
+	border-radius: 0 !important;
+	border-top: none !important;
+	border-left: none !important;
+	border-right: none !important;
+}
+
+.CodeMirror {
+	grid-row: 2;
+	height: 100% !important;
+	border: none !important;
+	border-radius: 0 !important;
+	grid-column: 1 / -1;
+	padding: 20px !important;
+	background-color: #ffffff;
+	color: #1f2937;
+}
+
+.EasyMDEContainer.sided--no-fullscreen .CodeMirror {
+	grid-column: 1 / 2 !important;
+	width: 100% !important;
+}
+
+.CodeMirror-scroll {
+	min-height: 0 !important;
+	padding-bottom: 2rem;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+}
+
+/* =========================================
+   2. STILE PREVIEW (LATO DESTRO)
+   ========================================= */
+.editor-preview-side {
+	grid-row: 2 / -1 !important;
+	grid-column: 2 / 3 !important;
+	position: static !important;
+	height: 100% !important;
+	width: 100% !important;
+	margin: 0 !important;
+	box-sizing: border-box !important;
+	overflow-y: auto !important;
+	border: none !important;
+	border-left: 1px solid var(--border-color) !important;
+	display: none !important;
+	padding: 20px !important;
+	background: #ffffff;
+	color: #1f2937;
+}
+
+.editor-preview-side.editor-preview-active-side {
+	display: block !important;
+}
+.editor-preview-active {
+	display: block;
+}
+
+.CodeMirror,
+.editor-preview-side,
+.editor-preview {
+	font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	font-size: 16px;
+	line-height: 1.6;
+}
+
+.editor-preview h1, .editor-preview h2 { border-bottom: 1px solid #e5e7eb; }
+.editor-preview h1 { font-size: 2.2rem; font-weight: 700; color: #111827; margin-top: 1.5rem; }
+.editor-preview h2 { font-size: 1.8rem; font-weight: 600; color: #1f2937; margin-top: 1.5rem; }
+.editor-preview ul, .editor-preview ol { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.editor-preview li { color: #1f2937; }
+
+/* =========================================
+   3. PULIZIA EDITOR 
+   ========================================= */
+.cm-s-easymde .cm-header-1,
+.cm-s-easymde .cm-header-2,
+.cm-s-easymde .cm-header-3,
+.cm-s-easymde .cm-header-4 {
+	color: #111827 !important;
+	font-weight: bold;
+}
+.cm-s-easymde .cm-header-1 { font-size: 2.2rem; }
+.cm-s-easymde .cm-header-2 { font-size: 1.8rem; }
+
+.cm-s-easymde .cm-variable,
+.cm-s-easymde .cm-variable-2,
+.cm-s-easymde .cm-variable-3 {
+	color: #1f2937 !important;
+}
+
+.cm-s-easymde span.cm-formatting,
+.cm-s-easymde span.cm-formatting-list,
+.cm-s-easymde span.cm-formatting-header,
+.cm-s-easymde span.cm-formatting-quote,
+.cm-s-easymde span.cm-formatting-strong,
+.cm-s-easymde span.cm-formatting-em,
+.cm-s-easymde span.cm-link,
+.cm-s-easymde span.cm-url {
+	color: #9ca3af !important;
+	font-weight: normal !important;
+	text-decoration: none !important;
+}
+
+.cm-s-easymde .cm-quote {
+	color: #4b5563 !important;
+	font-style: italic;
+}
+
+/* =========================================
+   4. COLORAZIONE CODICE (SOLO PARTE "CODE")
+   ========================================= */
+.cm-s-easymde .cm-keyword { color: #d73a49 !important; font-weight: bold; }
+.cm-s-easymde .cm-atom    { color: #905 !important; }
+.cm-s-easymde .cm-number  { color: #005cc5 !important; }
+.cm-s-easymde .cm-def     { color: #6f42c1 !important; }
+.cm-s-easymde .cm-string  { color: #032f62 !important; }
+.cm-s-easymde .cm-comment { color: #6a737d !important; font-style: italic; }
+.cm-s-easymde .cm-meta    { color: #6f42c1 !important; }
+
+.editor-preview pre,
+.editor-preview-side pre {
+	background: #f6f8fa;
+	padding: 16px;
+	border-radius: 6px;
+	overflow-x: auto;
+	border: 1px solid #e1e4e8;
+	margin: 1rem 0;
+	line-height: 1.45;
+}
+
+.editor-preview pre code,
+.editor-preview-side pre code {
+	background: transparent !important;
+	padding: 0;
+	border: none;
+	color: inherit;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	font-size: 0.85em;
+}
+
+.editor-preview p code,
+.editor-preview-side p code,
+.editor-preview li code,
+.editor-preview-side li code,
+.editor-preview td code,
+.editor-preview-side td code,
+.editor-preview blockquote code {
+	background: #ffeef0;
+	padding: 0.2em 0.4em;
+	border-radius: 4px;
+	font-size: 0.85em;
+	font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+	color: #b31d28 !important;
+	border: 1px solid #fadae0;
+}
+
+/* =========================================
+   5. ALTRI ELEMENTI (Immagini, Tabelle, Note)
+   ========================================= */
+.editor-preview img, .editor-preview-side img {
+	max-width: 100%;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.editor-preview table, .editor-preview-side table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1.5rem 0;
+}
+.editor-preview th, .editor-preview td, 
+.editor-preview-side th, .editor-preview-side td {
+	border: 1px solid #e5e7eb;
+	padding: 0.75rem;
+	text-align: left;
+}
+.editor-preview th, .editor-preview-side th {
+	background-color: #f9fafb;
+	font-weight: 600;
+}
+
+.editor-preview blockquote,
+.editor-preview-side blockquote {
+	margin: 1.5rem 0;
+	padding: 0.5rem;
+	background-color: #f9fafb;
+	border-left: 4px solid #e5e7eb;
+	border-radius: 0 4px 4px 0;
+	color: #4b5563;
+}
+
+.editor-preview h1, 
+.editor-preview h2, 
+.editor-preview h3, 
+.editor-preview h4, 
+.editor-preview h5, 
+.editor-preview h6,
+.editor-preview-side h1, 
+.editor-preview-side h2, 
+.editor-preview-side h3, 
+.editor-preview-side h4, 
+.editor-preview-side h5, 
+.editor-preview-side h6 {
+    scroll-margin-top: 20px; 
+}
+
+.editor-fade-container {
+    transition: opacity 0.15s ease-in-out;
+    opacity: 0; 
+}
+
+.editor-fade-container.visible {
+    opacity: 1;
+}

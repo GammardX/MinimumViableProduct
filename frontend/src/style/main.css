@@ -1,0 +1,178 @@
+:root {
+    --bg-sidebar: #f8f9fa;
+    --bg-main: #ffffff;
+    --border-color: #e5e7eb;
+    --accent-color: #3b82f6;
+    --text-primary: #1f2937;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* --- LAYOUT GENERALE --- */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+/* --- STRUTTURA SIDEBAR (Il contenitore esterno) --- */
+.sidebar-wrapper {
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100%;
+    z-index: 20;
+    overflow: hidden;
+}
+
+/* --- RESIZER --- */
+.resizer {
+    width: 5px;
+    cursor: col-resize;
+    background: transparent;
+    transition: background 0.2s;
+    z-index: 30;
+    margin-left: -2px;
+}
+.resizer:hover, .resizer:active {
+    background: var(--accent-color);
+}
+
+/* --- MAIN CONTENT STRUTTURA --- */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-main);
+    min-width: 0;
+    height: 100%;
+    position: relative;
+}
+
+/* --- EDITOR WRAPPER --- */
+.editor-wrapper {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* --- STATUS BAR --- */
+.status-bar {
+    color: var(--text-primary);
+    font-size: 12px;
+    padding: 4px 16px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.status-bar:hover {
+    background-color: var(--border-color);
+}
+
+.dialog-loading-container {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.dialog-text-pre {
+    white-space: pre-wrap;
+}
+
+.app-container.is-resizing {
+    user-select: none;
+    cursor: col-resize;
+}
+
+.resizer.active {
+    background-color: var(--accent-color);
+}
+
+.empty-state-btn {
+    margin-top: 1rem;
+}
+
+/* --- EMPTY STATE DASHBOARD --- */
+
+.empty-state-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    background: var(--bg-sidebar); 
+}
+
+.empty-state-card {
+    background: var(--bg-main);
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    max-width: 400px;
+}
+
+.empty-state-icon { 
+    font-size: 4rem; 
+    margin-bottom: 1rem; 
+}
+
+.empty-state-card h1 { 
+    font-size: 1.5rem; 
+    color: var(--text-primary); 
+    margin-bottom: 0.5rem; 
+}
+
+.empty-state-card p { 
+    color: #6b7280; 
+    line-height: 1.5; 
+    margin-bottom: 2rem; 
+}
+
+.empty-state-actions { 
+    display: flex; 
+    gap: 0.75rem; 
+    justify-content: center; 
+}
+
+.empty-state-actions button {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.95rem;
+}
+
+.empty-state-primary-btn {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+}
+
+.empty-state-primary-btn:hover { 
+    filter: brightness(1.1); 
+}
+
+.empty-state-secondary-btn {
+    background: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+}
+
+.empty-state-secondary-btn:hover { 
+    background: rgba(59, 130, 246, 0.05); 
+}
