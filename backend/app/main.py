@@ -1,3 +1,4 @@
+import os
 from app.config import settings
 from app.llm.client import call_llm
 from app.llm.parser import extract_json
@@ -9,15 +10,19 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://localhost:8000",
-    "http://localhost:4173",    
-    "http://127.0.0.1:5173",    
-    "https://gammardX.github.io/MinimumViableProduct",
-    "https://gammardx.github.io",
-    "http://padova.zucchetti.it:14000"
-]
+env_origins = os.getenv("ALLOWED_ORIGINS")
+
+if env_origins:
+    origins = env_origins.split(",")
+else:
+    # Fallback per lo sviluppo locale
+    origins = [
+        "http://localhost:5173",
+        "http://localhost:8000",
+        "http://localhost:4173",
+        "http://127.0.0.1:5173",
+        "http://padova.zucchetti.it:14000"
+    ]
 
 app.add_middleware(
     CORSMiddleware,
