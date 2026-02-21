@@ -166,3 +166,31 @@ body {
     background: rgba(59, 130, 246, 0.05); 
 }
 
+/* --- DIALOG LLM --- */
+.dialog-content-custom {
+    max-height: 40vh;
+    min-height: 150px;
+    display: block;
+}
+
+.dialog-content-custom.is-loading {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-loading-box {
+    display: flex;
+    align-items: center;
+    gap: 16px; 
+}
+
+.dialog-loading-text {
+    margin: 0;
+}
+
+.dialog-text-pre {
+    white-space: pre-wrap;
+    color: var(--text-primary);
+}

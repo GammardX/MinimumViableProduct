@@ -7,42 +7,45 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 interface DialogLLMProps {
-	text: string;
-	open: boolean;
-	loading: boolean;
-	onClose: () => void;
+    text: string;
+    open: boolean;
+    loading: boolean;
+    onClose: () => void;
 }
 
 export default function DialogLLM({
-	text,
-	open,
-	loading,
-	onClose
+    text,
+    open,
+    loading,
+    onClose
 }: DialogLLMProps) {
-	return (
-		<Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-			<DialogTitle>Risultato LLM</DialogTitle>
+    return (
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+            <DialogTitle>Risultato LLM</DialogTitle>
 
-			<DialogContent dividers>
+            <DialogContent 
+                dividers 
+                className={`dialog-content-custom ${loading ? 'is-loading' : ''}`}
+            >
                 {loading ? (
-                    <div className="dialog-loading-container"> 
-                        <CircularProgress size={22} />
-                        <DialogContentText>
+                    <div className="dialog-loading-box"> 
+                        <CircularProgress size={24} />
+                        <DialogContentText className="dialog-loading-text">
                             LLM sta generando la risposta…
                         </DialogContentText>
                     </div>
                 ) : (
-                    <DialogContentText className="dialog-text-pre" sx={{ color: 'text.primary' }}> 
+                    <DialogContentText className="dialog-text-pre"> 
                         {text || 'Nessun risultato'}
                     </DialogContentText>
                 )}
             </DialogContent>
 
-			<DialogActions>
-				<Button onClick={onClose} disabled={loading}>
-					Chiudi
-				</Button>
-			</DialogActions>
-		</Dialog>
-	);
+            <DialogActions>
+                <Button onClick={onClose} disabled={loading}>
+                    Chiudi
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
 }
