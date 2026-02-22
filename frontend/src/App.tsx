@@ -15,6 +15,7 @@ export interface Note {
     title: string;
     content: string;
     createdAt: number;
+    aiHistory?: Array<{ prompt: string; generatedText: string }>; 
 }
 
 const WELCOME_NOTE: Note = {
@@ -119,6 +120,7 @@ export default function App() {
     const [dialogText, setDialogText] = useState('');
     const [dialogLoading, setDialogLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
+    const [dialogPrompt, setDialogPrompt] = useState('');
 
     const llmBridge = {
         currentText: () => {
@@ -138,9 +140,10 @@ export default function App() {
             setDialogOpen(true);
         },
 
-        setDialogResult: (text: string) => {
+        setDialogResult: (text: string, prompt?: string) => {
             setDialogLoading(false);
             setDialogText(text);
+            if (prompt) setDialogPrompt(prompt);
         },
 
         getAbortSignal: () => {
@@ -155,6 +158,28 @@ export default function App() {
             setDialogLoading(false);
             setDialogText('Generazione annullata dall\'utente.');
         }
+    };
+
+    const handleInsertText = () => {
+        if (!editorInstance || !editorInstance.codemirror) return;
+        
+        editorInstance.codemirror.replaceSelection(dialogText);
+        
+        if (dialogPrompt) {
+            setNotes(prev => prev.map(note => {
+                if (note.id === activeNoteId) {
+                    const history = note.aiHistory || [];
+                    return { 
+                        ...note, 
+                        aiHistory: [...history, { prompt: dialogPrompt, generatedText: dialogText }] 
+                    };
+                }
+                return note;
+            }));
+        }
+        
+        setDialogOpen(false);
+        setSnackbar({ open: true, message: 'Testo inserito nel documento!', severity: 'success' });
     };
 
     const handleCloseLLMDialog = () => {
@@ -383,7 +408,7 @@ export default function App() {
             <div className='main-content'>
                 {activeNote ? (
                     <>
-                        <TopBar title={activeNote.title} llm={llmBridge} />
+                        <TopBar title={activeNote.title} llm={llmBridge} aiHistory={activeNote.aiHistory}/>
                         
                         {/* --- EDITOR MARKDOWN --- */}
                         <div className='editor-wrapper'>
@@ -453,7 +478,8 @@ export default function App() {
                 loading={dialogLoading}
                 onClose={handleCloseLLMDialog}
                 onCancel={llmBridge.abortCurrent} 
-                onCopySuccess={handleCopyLLMText}
+                onCopySuccess={handleCopyLLMText} 
+                onInsert={handleInsertText} 
             />
 
             {/* DIALOG CONFERMA ELIMINAZIONE */}

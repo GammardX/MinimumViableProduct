@@ -12,7 +12,8 @@ interface DialogLLMProps {
     loading: boolean;
     onClose: () => void;
     onCancel?: () => void;
-    onCopySuccess?: () => void; 
+    onCopySuccess?: () => void;
+    onInsert?: () => void;
 }
 
 export default function DialogLLM({
@@ -21,11 +22,18 @@ export default function DialogLLM({
     loading,
     onClose,
     onCancel,
-    onCopySuccess
+    onCopySuccess,
+    onInsert
 }: DialogLLMProps) {
-    
+    const isInvalidResult = 
+        text === "Generazione annullata dall'utente." || 
+        text.startsWith("Errore") || 
+        text.startsWith("Richiesta rifiutata") || 
+        text.startsWith("Input non valido") ||
+        text === "Nessun testo generato.";
+
     const handleCopy = () => {
-        if (!text) return;
+        if (!text || isInvalidResult) return; 
         navigator.clipboard.writeText(text)
             .then(() => {
                 if (onCopySuccess) onCopySuccess();
@@ -64,9 +72,16 @@ export default function DialogLLM({
                     </Button>
                 ) : (
                     <>
-                        <Button onClick={handleCopy} disabled={!text}>
-                            Copia
-                        </Button>
+                        {!isInvalidResult && onInsert && (
+                            <Button onClick={onInsert} variant="contained" disabled={!text}>
+                                Inserisci
+                            </Button>
+                        )}
+                        {!isInvalidResult && (
+                            <Button onClick={handleCopy} disabled={!text}>
+                                Copia
+                            </Button>
+                        )}
                         <Button onClick={onClose}>
                             Chiudi
                         </Button>
