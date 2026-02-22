@@ -11,7 +11,8 @@ interface DialogLLMProps {
     open: boolean;
     loading: boolean;
     onClose: () => void;
-    onCancel?: () => void; 
+    onCancel?: () => void;
+    onCopySuccess?: () => void; 
 }
 
 export default function DialogLLM({
@@ -19,8 +20,21 @@ export default function DialogLLM({
     open,
     loading,
     onClose,
-    onCancel 
+    onCancel,
+    onCopySuccess
 }: DialogLLMProps) {
+    
+    const handleCopy = () => {
+        if (!text) return;
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                if (onCopySuccess) onCopySuccess();
+            })
+            .catch(err => {
+                console.error("Errore durante la copia:", err);
+            });
+    };
+
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>Risultato LLM</DialogTitle>
@@ -49,9 +63,14 @@ export default function DialogLLM({
                         Annulla
                     </Button>
                 ) : (
-                    <Button onClick={onClose}>
-                        Chiudi
-                    </Button>
+                    <>
+                        <Button onClick={handleCopy} disabled={!text}>
+                            Copia
+                        </Button>
+                        <Button onClick={onClose}>
+                            Chiudi
+                        </Button>
+                    </>
                 )}
             </DialogActions>
         </Dialog>

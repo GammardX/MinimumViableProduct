@@ -334,6 +334,14 @@ export default function App() {
             .catch(err => console.error("Errore nella copia del link:", err));
     };
 
+    const handleCopyLLMText = () => {
+        setSnackbar({ 
+            open: true, 
+            message: "Testo copiato negli appunti!", 
+            severity: 'success' 
+        });
+    };
+
     const handleCloseSnackbar = (_event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') return;
         setSnackbar(prev => ({ ...prev, open: false }));
@@ -445,6 +453,7 @@ export default function App() {
                 loading={dialogLoading}
                 onClose={handleCloseLLMDialog}
                 onCancel={llmBridge.abortCurrent} 
+                onCopySuccess={handleCopyLLMText}
             />
 
             {/* DIALOG CONFERMA ELIMINAZIONE */}
