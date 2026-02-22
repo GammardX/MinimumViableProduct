@@ -4,7 +4,7 @@ from app.config import settings
 from app.llm.client import call_llm
 from app.llm.parser import extract_json
 from app.llm.prompts import (improve_prompt, six_hats_prompt, summarize_prompt,
-                             translate_prompt)
+                             translate_prompt, generate_prompt)
 from app.llm.schemas import LLMResponse
 from fastapi import FastAPI, HTTPException, Request 
 from fastapi.middleware.cors import CORSMiddleware
@@ -110,6 +110,11 @@ async def translate(payload: dict, request: Request):
 @app.post("/llm/six-hats", response_model=LLMResponse)
 async def six_hats(payload: dict, request: Request):
     messages = six_hats_prompt(payload["text"], payload["hat"])
+    return await run_with_disconnect_check(request, run_llm_request(messages))
+
+@app.post("/llm/generate", response_model=LLMResponse)
+async def generate(payload: dict, request: Request):
+    messages = generate_prompt(payload["prompt"])
     return await run_with_disconnect_check(request, run_llm_request(messages))
 
 # risveglia il server
