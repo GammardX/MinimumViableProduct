@@ -29,13 +29,14 @@ const BACKEND_BASE_URL =
  * Helper HTTP
  * ======================= */
 
-async function post<T>(endpoint: string, body: unknown): Promise<T> {
+async function post<T>(endpoint: string, body: unknown, signal?: AbortSignal): Promise<T> {
 	const res = await fetch(`${BACKEND_BASE_URL}${endpoint}`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify(body)
+		body: JSON.stringify(body),
+        signal 
 	});
 
 	if (!res.ok) {
@@ -55,12 +56,13 @@ async function post<T>(endpoint: string, body: unknown): Promise<T> {
  */
 export async function summarizeText(
 	text: string,
-	percentage: number = 30
+	percentage: number = 30,
+	signal?: AbortSignal
 ): Promise<LLMResponse> {
 	return post<LLMResponse>('/llm/summarize', {
 		text,
 		percentage
-	});
+	}, signal);
 }
 
 /**
@@ -68,12 +70,13 @@ export async function summarizeText(
  */
 export async function improveWriting(
 	text: string,
-	criterion: string = 'chiarezza e stile professionale'
+	criterion: string = 'chiarezza e stile professionale',
+	signal?: AbortSignal
 ): Promise<LLMResponse> {
 	return post<LLMResponse>('/llm/improve', {
 		text,
 		criterion
-	});
+	}, signal);
 }
 
 /**
@@ -81,12 +84,13 @@ export async function improveWriting(
  */
 export async function translate(
 	text: string,
-	targetLanguage: string
+	targetLanguage: string,
+	signal?: AbortSignal
 ): Promise<LLMResponse> {
 	return post<LLMResponse>('/llm/translate', {
 		text,
 		targetLanguage
-	});
+	}, signal);
 }
 
 /**
@@ -94,12 +98,13 @@ export async function translate(
  */
 export async function applySixHats(
 	text: string,
-	hat: 'Bianco' | 'Rosso' | 'Nero' | 'Giallo' | 'Verde' | 'Blu'
+	hat: 'Bianco' | 'Rosso' | 'Nero' | 'Giallo' | 'Verde' | 'Blu',
+	signal?: AbortSignal
 ): Promise<LLMResponse> {
 	return post<LLMResponse>('/llm/six-hats', {
 		text,
 		hat
-	});
+	}, signal);
 }
 
 /*

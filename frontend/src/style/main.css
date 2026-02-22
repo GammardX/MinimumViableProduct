@@ -169,7 +169,6 @@ body {
 /* --- DIALOG LLM --- */
 .dialog-content-custom {
     max-height: 40vh;
-    min-height: 150px;
     display: block;
 }
 

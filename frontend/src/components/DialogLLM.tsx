@@ -11,13 +11,15 @@ interface DialogLLMProps {
     open: boolean;
     loading: boolean;
     onClose: () => void;
+    onCancel?: () => void; 
 }
 
 export default function DialogLLM({
     text,
     open,
     loading,
-    onClose
+    onClose,
+    onCancel 
 }: DialogLLMProps) {
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -42,9 +44,15 @@ export default function DialogLLM({
             </DialogContent>
 
             <DialogActions>
-                <Button onClick={onClose} disabled={loading}>
-                    Chiudi
-                </Button>
+                {loading ? (
+                    <Button onClick={onCancel} color="error">
+                        Annulla
+                    </Button>
+                ) : (
+                    <Button onClick={onClose}>
+                        Chiudi
+                    </Button>
+                )}
             </DialogActions>
         </Dialog>
     );

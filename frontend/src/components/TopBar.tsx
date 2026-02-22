@@ -26,6 +26,7 @@ interface TopBarProps {
         currentText: () => string;
         openLoadingDialog: () => void;
         setDialogResult: (t: string) => void;
+        getAbortSignal: () => AbortSignal; 
     };
 }
 
@@ -66,12 +67,15 @@ export default function TopBar({ title, llm }: TopBarProps) {
         llm.openLoadingDialog();
 
         try {
-            const result = await summarizeText(llm.currentText(), summaryPercentage);
+            const signal = llm.getAbortSignal();
+            const result = await summarizeText(llm.currentText(), summaryPercentage, signal);
             handleLLMResponse(result);
-        } catch {
-            llm.setDialogResult(
-                'Errore di connessione o parsing durante la generazione.'
-            );
+        } catch (error: any) {
+            if (error.name !== 'AbortError') {
+                llm.setDialogResult(
+                    'Errore di connessione o parsing durante la generazione.'
+                );
+            }
         }
     };
 
@@ -93,12 +97,15 @@ export default function TopBar({ title, llm }: TopBarProps) {
         llm.openLoadingDialog();
 
         try {
-            const result = await improveWriting(llm.currentText(), criterion);
+            const signal = llm.getAbortSignal();
+            const result = await improveWriting(llm.currentText(), criterion, signal);
             handleLLMResponse(result);
-        } catch {
-            llm.setDialogResult(
-                'Errore di connessione o parsing durante la generazione.'
-            );
+        } catch (error: any) {
+            if (error.name !== 'AbortError') {
+                llm.setDialogResult(
+                    'Errore di connessione o parsing durante la generazione.'
+                );
+            }
         }
     };
 
@@ -120,12 +127,13 @@ export default function TopBar({ title, llm }: TopBarProps) {
         llm.openLoadingDialog();
 
         try {
-            const result = await translate(llm.currentText(), targetLanguage);
+            const signal = llm.getAbortSignal();
+            const result = await translate(llm.currentText(), targetLanguage, signal);
             handleLLMResponse(result);
-        } catch {
-            llm.setDialogResult(
-                'Errore di connessione o parsing durante la generazione.'
-            );
+        } catch (error: any) {
+            if (error.name !== 'AbortError') {
+                llm.setDialogResult('Errore di connessione o parsing durante la generazione.');
+            }
         }
     };
 
@@ -177,15 +185,19 @@ export default function TopBar({ title, llm }: TopBarProps) {
                                 handleMenuClose();
                                 llm.openLoadingDialog();
                                 try {
+                                    const signal = llm.getAbortSignal();
                                     const result = await applySixHats(
                                         llm.currentText(),
-                                        hat.id 
+                                        hat.id,
+                                        signal 
                                     );
                                     handleLLMResponse(result);
-                                } catch (error) {
-                                    llm.setDialogResult(
-                                        'Errore di connessione o parsing durante la generazione.'
-                                    );
+                                } catch (error: any) {
+                                    if (error.name !== 'AbortError') {
+                                        llm.setDialogResult(
+                                            'Errore di connessione o parsing durante la generazione.'
+                                        );
+                                    }
                                 }
                             }}>
                             <span

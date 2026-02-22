@@ -118,19 +118,17 @@ export default function App() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogText, setDialogText] = useState('');
     const [dialogLoading, setDialogLoading] = useState(false);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
     const llmBridge = {
         currentText: () => {
             let selectedText = '';
-
             if (editorInstance && editorInstance.codemirror) {
                 selectedText = editorInstance.codemirror.getSelection();
             }
-
             if (!selectedText) {
                 selectedText = window.getSelection()?.toString() || '';
             }
-
             return selectedText.trim() || activeNote?.content || '';
         },
 
@@ -143,8 +141,36 @@ export default function App() {
         setDialogResult: (text: string) => {
             setDialogLoading(false);
             setDialogText(text);
+        },
+
+        getAbortSignal: () => {
+            abortControllerRef.current = new AbortController();
+            return abortControllerRef.current.signal;
+        },
+
+        abortCurrent: () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+            setDialogLoading(false);
+            setDialogText('Generazione annullata dall\'utente.');
         }
     };
+
+    const handleCloseLLMDialog = () => {
+        if (dialogLoading) {
+            llmBridge.abortCurrent();
+        }
+        setDialogOpen(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, []);
 
     const handleCreateNote = () => {
         const newNote: Note = {
@@ -350,13 +376,15 @@ export default function App() {
                 {activeNote ? (
                     <>
                         <TopBar title={activeNote.title} llm={llmBridge} />
+                        
+                        {/* --- EDITOR MARKDOWN --- */}
                         <div className='editor-wrapper'>
                             <MarkdownEditor
                                 key={activeNote.id}
                                 initialValue={activeNote.content}
                                 onChange={handleUpdateNote}
-                                onNavigate={handleNavigate} 
-                                onInstanceReady={setEditorInstance}
+                                onNavigate={handleNavigate}
+                                onInstanceReady={setEditorInstance} 
                             />
                         </div>
                         
@@ -393,6 +421,7 @@ export default function App() {
                 )}
             </div>
 
+            {/* FEEDBACK SNACKBAR UNIFICATA */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}
@@ -409,11 +438,13 @@ export default function App() {
                 </Alert>
             </Snackbar>
 
+            {/* DIALOG LLM */}
             <DialogLLM
                 text={dialogText}
                 open={dialogOpen}
                 loading={dialogLoading}
-                onClose={() => setDialogOpen(false)}
+                onClose={handleCloseLLMDialog}
+                onCancel={llmBridge.abortCurrent} 
             />
 
             {/* DIALOG CONFERMA ELIMINAZIONE */}
