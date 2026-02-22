@@ -10,13 +10,15 @@ import './utils/languageImports';
 interface MarkdownEditorProps {
     initialValue?: string;
     onChange?: (text: string) => void;
-    onNavigate?: (target: string, anchor?: string) => void; 
+    onNavigate?: (target: string, anchor?: string) => void;
+    onInstanceReady?: (instance: EasyMDE) => void; 
 }
 
 export default function MarkdownEditor({
     initialValue = '',
     onChange,
-    onNavigate
+    onNavigate,
+    onInstanceReady 
 }: MarkdownEditorProps) {
     const [value, setValue] = useState(initialValue);
     const [editorInstance, setEditorInstance] = useState<EasyMDE | null>(null);
@@ -61,6 +63,10 @@ export default function MarkdownEditor({
 
     useEffect(() => {
         if (!editorInstance) return;
+
+        if (onInstanceReady) {
+            onInstanceReady(editorInstance);
+        }
         
         if (!editorInstance.isSideBySideActive()) {
             EasyMDE.toggleSideBySide(editorInstance);

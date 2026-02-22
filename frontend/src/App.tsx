@@ -114,12 +114,25 @@ export default function App() {
     };
 
     // --- GESTIONE LLM DIALOG ---
+    const [editorInstance, setEditorInstance] = useState<any>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogText, setDialogText] = useState('');
     const [dialogLoading, setDialogLoading] = useState(false);
 
     const llmBridge = {
-        currentText: () => activeNote?.content || '',
+        currentText: () => {
+            let selectedText = '';
+
+            if (editorInstance && editorInstance.codemirror) {
+                selectedText = editorInstance.codemirror.getSelection();
+            }
+
+            if (!selectedText) {
+                selectedText = window.getSelection()?.toString() || '';
+            }
+
+            return selectedText.trim() || activeNote?.content || '';
+        },
 
         openLoadingDialog: () => {
             setDialogText('');
@@ -343,6 +356,7 @@ export default function App() {
                                 initialValue={activeNote.content}
                                 onChange={handleUpdateNote}
                                 onNavigate={handleNavigate} 
+                                onInstanceReady={setEditorInstance}
                             />
                         </div>
                         
