@@ -1,6 +1,9 @@
 # MinimumViableProduct
 Repository contenente MVP sviluppato dal gruppo GammardX
 
+# Documentazione
+Tutta la documentazione relativa al progetto può essere visionata nella seguente repository: https://github.com/GammardX/Documents
+
 # Prerequisiti
 
 ## Avere un file .env dentro la cartella backend
