@@ -107,6 +107,43 @@ export async function applySixHats(
 	}, signal);
 }
 
+/**
+ * Distant Writing
+ */
+export async function generateText(
+    prompt: string,
+    signal?: AbortSignal
+): Promise<LLMResponse> {
+    return post<LLMResponse>('/llm/generate', {
+        prompt
+    }, signal);
+}
+
+/**
+ * Calcola la somiglianza tra il testo selezionato e un testo di confronto.
+ * Restituisce una percentuale da 0 a 100.
+ * È ottimizzata per essere veloce e riconoscere anche piccole porzioni di testo.
+ */
+export function checkTextSimilarity(selectedText: string, aiText: string): number {
+    if (!selectedText || !aiText) return 0;
+
+    const getWords = (text: string) => text.toLowerCase().match(/\b\w+\b/g) || [];
+    
+    const selectedWords = getWords(selectedText);
+    const aiWords = new Set(getWords(aiText));
+
+    if (selectedWords.length === 0 || aiWords.size === 0) return 0;
+
+    let matches = 0;
+    for (const word of selectedWords) {
+        if (aiWords.has(word)) {
+            matches++;
+        }
+    }
+
+    return (matches / selectedWords.length) * 100;
+}
+
 /*
 Accende il server con una richiesta di salute. 
 Non aspetta la risposta, serve solo a svegliarlo se è in sleep mode
