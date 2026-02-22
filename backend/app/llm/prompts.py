@@ -199,7 +199,7 @@ def six_hats_prompt(text: str, hat: str) -> list[dict]:
     REGOLE DI FORMATTAZIONE:
     1. NON restituire il testo originale.
     2. Restituisci ESCLUSIVAMENTE un oggetto JSON valido.
-    3. L'analisi deve essere inserita nel campo 'rewritten_text' formattata in Markdown.
+    3. L'analisi deve essere inserita nel campo 'rewritten_text' formattata in plaintext con caratteri di nuova riga (\n) per separare i paragrafi e elenchi puntati all'occorenza.
 
     SCHEMA OUTPUT JSON:
     {{
@@ -209,7 +209,7 @@ def six_hats_prompt(text: str, hat: str) -> list[dict]:
           "violation_category": null 
       }},
       "data": {{
-          "rewritten_text": "Inserisci qui l'analisi completa formattata in Markdown (usa ## Titoli, * punti elenco). Se c'è un errore o rifiuto, spiega qui il motivo.",
+          "rewritten_text": "Inserisci qui l'analisi completa. Se c'è un errore o rifiuto, spiega qui il motivo.",
           "detected_language": "Codice lingua (es. it, en)"
       }}
     }}
