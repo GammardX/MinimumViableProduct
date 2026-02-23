@@ -3,6 +3,7 @@
     display: flex; 
     flex-direction: column; 
     height: 100%; 
+    padding-bottom: 80px;
 }
 
 .sidebar-header { 
@@ -34,6 +35,7 @@
     margin: 0; 
     overflow-y: auto; 
     flex-grow: 1; 
+    padding-bottom: 20px;
 }
 
 .file-list li { 

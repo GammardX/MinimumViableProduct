@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react'; 
 import type { Note } from '../App';
 import '../style/filesidebar.css';
 
@@ -25,6 +25,32 @@ export default function FileSidebar({
 }: FileSidebarProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [tempTitle, setTempTitle] = useState("");
+    
+    const listRef = useRef<HTMLUListElement>(null);
+
+    useEffect(() => {
+        const container = listRef.current;
+        if (container) {
+            const activeElement = container.querySelector('.active') as HTMLElement;
+            if (activeElement) {
+                const containerRect = container.getBoundingClientRect();
+                const elementRect = activeElement.getBoundingClientRect();
+
+                if (elementRect.bottom > containerRect.bottom) {
+                    container.scrollBy({
+                        top: elementRect.bottom - containerRect.bottom + 20, 
+                        behavior: 'smooth'
+                    });
+                } 
+                else if (elementRect.top < containerRect.top) {
+                    container.scrollBy({
+                        top: elementRect.top - containerRect.top - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+    }, [activeId, notes.length]);
 
     const startEditing = (note: Note, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -72,7 +98,7 @@ export default function FileSidebar({
                 </div>
             </div>
             
-            <ul className='file-list'>
+            <ul className='file-list' ref={listRef}>
                 {notes.map((note) => (
                     <li 
                         key={note.id} 
