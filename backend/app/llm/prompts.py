@@ -199,7 +199,7 @@ def six_hats_prompt(text: str, hat: str) -> list[dict]:
     REGOLE DI FORMATTAZIONE:
     1. NON restituire il testo originale.
     2. Restituisci ESCLUSIVAMENTE un oggetto JSON valido.
-    3. L'analisi deve essere inserita nel campo 'rewritten_text' formattata in plaintext con caratteri di nuova riga (\n) per separare i paragrafi e elenchi puntati all'occorenza.
+    3. L'analisi deve essere inserita nel campo 'rewritten_text' formatta in Markdown se appropriato (usa grassetti, liste, titoli).
 
     SCHEMA OUTPUT JSON:
     {{
