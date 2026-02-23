@@ -114,7 +114,9 @@ async def six_hats(payload: dict, request: Request):
 
 @app.post("/llm/generate", response_model=LLMResponse)
 async def generate(payload: dict, request: Request):
-    messages = generate_prompt(payload["prompt"])
+    context_text = payload.get("context_text", "")
+    word_count = payload.get("word_count", 300) 
+    messages = generate_prompt(payload["prompt"], context_text, word_count)
     return await run_with_disconnect_check(request, run_llm_request(messages))
 
 # risveglia il server

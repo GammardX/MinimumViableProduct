@@ -58,6 +58,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     const [openGenerate, setOpenGenerate] = useState(false);
     const [generatePrompt, setGeneratePrompt] = useState('');
     const [isEditingAI, setIsEditingAI] = useState(false);
+    const [wordCount, setWordCount] = useState<number>(300);
 
     const handleGenerateClick = () => {
         const text = llm.currentText();
@@ -91,7 +92,9 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
 
         try {
             const signal = llm.getAbortSignal();
-            const result = await generateText(generatePrompt, signal);
+            const currentContext = llm.currentText(); 
+
+            const result = await generateText(generatePrompt, currentContext, wordCount, signal);
             handleLLMResponse(result, generatePrompt); 
         } catch (error: any) {
             if (error.name !== 'AbortError') {
@@ -242,9 +245,9 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
                 <DialogTitle>
                     {isEditingAI ? 'Modifica testo generato' : 'Cosa vuoi scrivere?'}
                 </DialogTitle>
-                <DialogContent sx={{ mt: 1 }}>
+                <DialogContent sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     {isEditingAI && (
-                        <Alert severity="warning" sx={{ mb: 2 }}>
+                        <Alert severity="warning">
                             Attenzione: stai rigenerando un testo creato dall'IA. Le tue modifiche manuali su questa sezione andranno perse.
                         </Alert>
                     )}
@@ -256,6 +259,17 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
                         placeholder='Es: Scrivi un paragrafo introduttivo sui buchi neri...'
                         value={generatePrompt}
                         onChange={(e) => setGeneratePrompt(e.target.value)}
+                    />
+                    <TextField
+                        type="number"
+                        label="Numero indicativo di parole"
+                        fullWidth
+                        value={wordCount}
+                        onChange={(e) => {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val)) setWordCount(val);
+                        }}
+                        inputProps={{ min: 0, max: 10000, step: 50 }}
                     />
                 </DialogContent>
                 <DialogActions>

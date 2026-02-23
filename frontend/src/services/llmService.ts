@@ -112,10 +112,14 @@ export async function applySixHats(
  */
 export async function generateText(
     prompt: string,
+    contextText: string = '',
+    wordCount: number = 300, 
     signal?: AbortSignal
 ): Promise<LLMResponse> {
     return post<LLMResponse>('/llm/generate', {
-        prompt
+        prompt,
+        context_text: contextText,
+        word_count: wordCount 
     }, signal);
 }
 

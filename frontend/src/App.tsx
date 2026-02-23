@@ -163,7 +163,7 @@ export default function App() {
     const handleInsertText = () => {
         if (!editorInstance || !editorInstance.codemirror) return;
         
-        editorInstance.codemirror.replaceSelection(dialogText);
+        editorInstance.codemirror.replaceSelection(dialogText + '\n\n');
         
         if (dialogPrompt) {
             setNotes(prev => prev.map(note => {

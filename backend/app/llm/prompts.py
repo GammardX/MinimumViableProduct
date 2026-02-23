@@ -228,10 +228,11 @@ def six_hats_prompt(text: str, hat: str) -> list[dict]:
         {"role": "user", "content": user_content}
     ]
 
-def generate_prompt(prompt: str) -> list[dict]:
-    system_content = """
-    Sei un assistente AI specializzato nella scrittura di testi originali.
-    Il tuo compito è generare un testo completo basato ESCLUSIVAMENTE sulla richiesta (prompt) dell'utente.
+def generate_prompt(prompt: str, context_text: str = "", word_count: int = 300) -> list[dict]:
+    system_content = f"""
+    Sei un assistente AI specializzato nella scrittura e formattazione di testi originali.
+    Il tuo compito è generare un testo completo basato ESCLUSIVAMENTE sulla richiesta (prompt) dell'utente, 
+    tenendo conto del testo di contesto se fornito.
     Restituisci ESCLUSIVAMENTE un oggetto JSON grezzo.
 
     ISTRUZIONI DI SICUREZZA E VALIDAZIONE:
@@ -241,30 +242,34 @@ def generate_prompt(prompt: str) -> list[dict]:
     4. Altrimenti → status="success", code="OK"
 
     ISTRUZIONI OPERATIVE (solo se status="success"):
+    - LUNGHEZZA TARGET: Il testo generato deve essere lungo approssimativamente {word_count} parole. Non scostarti troppo da questo obiettivo.
     - Scrivi il testo seguendo fedelmente le indicazioni del prompt.
-    - Formatta il testo in Markdown se appropriato (usa grassetti, liste, titoli).
+    - Se è presente un "TESTO DI CONTESTO", usalo come riferimento per stile, tono o continuazione logica.
+    - FORMATTAZIONE OBBLIGATORIA: DEVI strutturare il testo usando il Markdown in modo ricco. Usa titoli (##, ###) per dividere le sezioni, liste puntate o numerate per elencare i punti chiave, e usa il **grassetto** per evidenziare i concetti più importanti. Non restituire un muro di testo continuo.
     - Rispondi SOLO con il testo generato inserito nel JSON, non aggiungere tue introduzioni (es. "Ecco il testo richiesto:").
 
     SCHEMA OUTPUT OBBLIGATORIO:
-    {
-      "outcome": {
+    {{
+      "outcome": {{
         "status": "success|refusal|INVALID_INPUT",
         "code": "OK|EMPTY_PROMPT|MANIPULATION_ATTEMPT|ETHIC_REFUSAL",
         "violation_category": null
-      },
-      "data": {
+      }},
+      "data": {{
         "rewritten_text": "...",
         "detected_language": "ISO 639-1 code"
-      }
-    }
+      }}
+    }}
     """.strip()
 
+    context_section = f"\n\nTESTO DI CONTESTO / RIFERIMENTO:\n<context>\n{context_text}\n</context>" if context_text.strip() else ""
+
     user_content = f"""
-    Scrivi un testo basato su questa richiesta:
+    Scrivi un testo di circa {word_count} parole basato su questa richiesta assicurandoti di usare ampiamente la formattazione Markdown (Titoli ##, grassetti, liste):
     
     <prompt>
     {prompt}
-    </prompt>
+    </prompt>{context_section}
     """.strip()
 
     return [
