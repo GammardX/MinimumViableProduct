@@ -1,104 +1,116 @@
-.file-sidebar { 
-    padding: 1rem; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-    padding-bottom: 80px;
+.file-sidebar {
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding-bottom: 80px;
 }
 
-.sidebar-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    margin-bottom: 1rem; 
+.sidebar-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
 }
 
-.sidebar-header h3 { 
-    margin: 0; 
-    font-size: 0.9rem; 
-    color: #6b7280; 
+.sidebar-header h3 {
+	margin: 0;
+	font-size: 0.9rem;
+	color: #6b7280;
 }
 
-.btn-add { 
-    background: var(--accent-color); 
-    color: white; 
-    border: none; 
-    width: 24px; 
-    height: 24px; 
-    border-radius: 4px; 
-    cursor: pointer; 
+.file-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	overflow-y: auto;
+	flex-grow: 1;
+	padding-bottom: 20px;
 }
 
-.file-list { 
-    list-style: none; 
-    padding: 0; 
-    margin: 0; 
-    overflow-y: auto; 
-    flex-grow: 1; 
-    padding-bottom: 20px;
+.file-list li {
+	display: flex;
+	align-items: center;
+	padding: 8px 10px;
+	border-radius: 6px;
+	cursor: pointer;
+	margin-bottom: 4px;
+	color: var(--text-primary);
 }
 
-.file-list li { 
-    display: flex; 
-    align-items: center; 
-    padding: 8px 10px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    margin-bottom: 4px; 
-    color: var(--text-primary); 
+.file-list li:hover {
+	background: #e5e7eb;
 }
 
-.file-list li:hover { 
-    background: #e5e7eb; 
+.file-list li.active {
+	background: #e0e7ff;
+	color: var(--accent-color);
 }
 
-.file-list li.active { 
-    background: #e0e7ff; 
-    color: var(--accent-color); 
+.file-name {
+	flex-grow: 1;
+	margin-left: 8px;
+	font-size: 0.95rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-.file-name { 
-    flex-grow: 1; 
-    margin-left: 8px; 
-    font-size: 0.95rem; 
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+.btn-delete {
+	opacity: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
 }
 
-.btn-delete { 
-    opacity: 0; 
-    border: none; 
-    background: transparent; 
-    cursor: pointer; 
+.file-list li:hover .btn-delete {
+	opacity: 1;
 }
 
-.file-list li:hover .btn-delete { 
-    opacity: 1; 
-}
-
-.empty-state { 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    height: 100%; 
-    color: #9ca3af; 
+.empty-state {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	color: #9ca3af;
 }
 
 .file-rename-input {
-    flex-grow: 1;
-    margin-left: 8px;
-    padding: 2px 5px;
-    font-size: 0.95rem;
-    border: 1px solid #3b82f6; 
-    border-radius: 4px;
-    outline: none;
-    background-color: white;
-    color: #1f2937;
-    min-width: 0;
+	flex-grow: 1;
+	margin-left: 8px;
+	padding: 2px 5px;
+	font-size: 0.95rem;
+	border: 1px solid #3b82f6;
+	border-radius: 4px;
+	outline: none;
+	background-color: white;
+	color: #1f2937;
+	min-width: 0;
+}
+
+.btn-add {
+	background: var(--accent-color);
+	color: white;
+	border: none;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	cursor: pointer;
 }
 
 .button-files {
-    gap: 8px;
-    display: flex;
+	gap: 8px;
+	display: flex;
+}
+
+.button-files .btn-icon {
+	height: 28px;
+	width: 35px;
+	border: 1px solid var(--border-color);
+	background: white;
+	border-radius: 6px;
+	cursor: pointer;
+}
+.button-files .btn-icon:hover {
+	background: #f3f4f6;
 }
