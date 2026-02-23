@@ -23,7 +23,8 @@ interface TopBarProps {
     aiHistory?: Array<{ prompt: string; generatedText: string }>; 
     llm: {
         currentText: () => string;
-        openLoadingDialog: () => void;
+        hasSelection: () => boolean; // <-- NUOVO
+        openLoadingDialog: (type?: 'insert' | 'analysis' | 'summary') => void; 
         setDialogResult: (t: string, prompt?: string) => void; 
         getAbortSignal: () => AbortSignal; 
     };
@@ -115,7 +116,11 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
 
     const handleConfirmSummarize = async () => {
         setOpenSummary(false);
-        llm.openLoadingDialog();
+        
+        const isSelection = llm.hasSelection();
+        
+        llm.openLoadingDialog(isSelection ? 'insert' : 'summary');
+        
         try {
             const signal = llm.getAbortSignal();
             const result = await summarizeText(llm.currentText(), summaryPercentage, signal);
@@ -220,7 +225,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
                             key={hat.id} 
                             onClick={async () => {
                                 handleSixHats();
-                                llm.openLoadingDialog();
+                                llm.openLoadingDialog('analysis');
                                 try {
                                     const signal = llm.getAbortSignal();
                                     const result = await applySixHats(llm.currentText(), hat.id, signal);

@@ -121,6 +121,7 @@ export default function App() {
     const [dialogLoading, setDialogLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const [dialogPrompt, setDialogPrompt] = useState('');
+    const [dialogActionType, setDialogActionType] = useState<'insert' | 'analysis' | 'summary'>('insert');
 
     const llmBridge = {
         currentText: () => {
@@ -134,7 +135,19 @@ export default function App() {
             return selectedText.trim() || activeNote?.content || '';
         },
 
-        openLoadingDialog: () => {
+        hasSelection: () => {
+            let selectedText = '';
+            if (editorInstance && editorInstance.codemirror) {
+                selectedText = editorInstance.codemirror.getSelection();
+            }
+            if (!selectedText) {
+                selectedText = window.getSelection()?.toString() || '';
+            }
+            return selectedText.trim().length > 0;
+        },
+
+        openLoadingDialog: (type: 'insert' | 'analysis' | 'summary' = 'insert') => {
+            setDialogActionType(type);
             setDialogText('');
             setDialogLoading(true);
             setDialogOpen(true);
@@ -180,6 +193,24 @@ export default function App() {
         
         setDialogOpen(false);
         setSnackbar({ open: true, message: 'Testo inserito nel documento!', severity: 'success' });
+    };
+
+    const handleCreateNewNoteFromResult = () => {
+        if (!activeNote) return;
+        
+        const prefix = dialogActionType === 'summary' ? 'Riassunto' : 'Analisi';
+        
+        const newNote: Note = {
+            id: Date.now().toString(),
+            title: `${prefix}: ${activeNote.title}`,
+            content: dialogText,
+            createdAt: Date.now()
+        };
+        
+        setNotes((prev) => [...prev, newNote]);
+        setActiveNoteId(newNote.id);
+        setDialogOpen(false);
+        setSnackbar({ open: true, message: `Nota creata con successo!`, severity: 'success' });
     };
 
     const handleCloseLLMDialog = () => {
@@ -476,10 +507,12 @@ export default function App() {
                 text={dialogText}
                 open={dialogOpen}
                 loading={dialogLoading}
+                actionType={dialogActionType}
                 onClose={handleCloseLLMDialog}
                 onCancel={llmBridge.abortCurrent} 
                 onCopySuccess={handleCopyLLMText} 
                 onInsert={handleInsertText} 
+                onCreateNewNote={handleCreateNewNoteFromResult} 
             />
 
             {/* DIALOG CONFERMA ELIMINAZIONE */}

@@ -10,20 +10,24 @@ interface DialogLLMProps {
     text: string;
     open: boolean;
     loading: boolean;
+    actionType?: 'insert' | 'analysis' | 'summary'; 
     onClose: () => void;
     onCancel?: () => void;
     onCopySuccess?: () => void;
     onInsert?: () => void;
+    onCreateNewNote?: () => void;
 }
 
 export default function DialogLLM({
     text,
     open,
     loading,
+    actionType = 'insert',
     onClose,
     onCancel,
     onCopySuccess,
-    onInsert
+    onInsert,
+    onCreateNewNote 
 }: DialogLLMProps) {
     const isInvalidResult = 
         text === "Generazione annullata dall'utente." || 
@@ -72,11 +76,18 @@ export default function DialogLLM({
                     </Button>
                 ) : (
                     <>
-                        {!isInvalidResult && onInsert && (
+                        {!isInvalidResult && actionType === 'insert' && onInsert && (
                             <Button onClick={onInsert} variant="contained" disabled={!text}>
                                 Inserisci
                             </Button>
                         )}
+                        
+                        {!isInvalidResult && (actionType === 'analysis' || actionType === 'summary') && onCreateNewNote && (
+                            <Button onClick={onCreateNewNote} variant="contained" disabled={!text}>
+                                Salva come nota
+                            </Button>
+                        )}
+
                         {!isInvalidResult && (
                             <Button onClick={handleCopy} disabled={!text}>
                                 Copia
