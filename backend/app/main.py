@@ -34,34 +34,71 @@ app.add_middleware(
 )
 
 async def run_llm_request(messages: list[dict]):
-    try:
+    providers = [
+        {
+            "name": "LOCALE",
+            "url": settings.LOCAL_LLM_URL,
+            "model": settings.LOCAL_LLM_MODEL,
+            "key": None,
+            "requires_key": False
+        },
+        {
+            "name": "ZUCCHETTI",
+            "url": settings.ZUCCHETTI_API_URL,
+            "model": settings.ZUCCHETTI_MODEL,
+            "key": settings.ZUCCHETTI_API_KEY,
+            "requires_key": True
+        },
+        {
+            "name": "GROQ",
+            "url": settings.GROQ_API_URL,
+            "model": settings.GROQ_MODEL,
+            "key": settings.GROQ_API_KEY,
+            "requires_key": True
+        },
+        {
+            "name": "GOOGLE",
+            "url": settings.GOOGLE_API_URL,
+            "model": settings.GOOGLE_MODEL,
+            "key": settings.GOOGLE_API_KEY,
+            "requires_key": True
+        }
+    ]
+
+    last_error = None
+
+    for provider in providers:
+        if not provider["url"] or not provider["model"]:
+            print(f"[{provider['name']}] Saltato: Variabili non configurate nel file .env")
+            continue
+        
+        if provider["requires_key"] and not provider["key"]:
+            print(f"[{provider['name']}] Saltato: API Key mancante")
+            continue
+
         try:
+            print(f"Tento la generazione con: {provider['name']} (Modello: {provider['model']})")
+            
             raw = await call_llm(
                 messages, 
-                settings.LLM_API_URL,
-                settings.LLM_MODEL,
-                settings.LLM_API_KEY,
+                provider["url"],
+                provider["model"],
+                provider["key"]
             )
+            return extract_json(raw)
+            
         except asyncio.CancelledError:
             print("Chiamata annullata dal client frontend.")
             raise
         except Exception as e:
-            print(f"Primary LLM local failed: {e}. Switching to fallback.")
-            raw = await call_llm(
-                messages, 
-                "http://padova.zucchetti.it:14000/v1/chat/completions",
-                "gpt-oss:20b",
-                settings.LLM_API_KEY,
-            )
-        
-        return extract_json(raw)
+            print(f"[{provider['name']}] Fallito: {str(e)}. Passo al prossimo fallback...")
+            last_error = e
 
-    except asyncio.CancelledError:
-        print("Chiamata annullata dal client frontend.")
-        raise
-    except Exception as global_e:
-        print(f"Errore critico durante la chiamata LLM: {global_e}")
-        raise HTTPException(status_code=400, detail=f"Errore del servizio AI: {str(global_e)}")
+    print("Tutti i provider LLM sono falliti o non configurati.")
+    raise HTTPException(
+        status_code=500, 
+        detail=f"Errore critico: Nessun servizio AI disponibile al momento. Ultimo errore: {str(last_error)}"
+    )
 
 async def run_with_disconnect_check(request: Request, coro):
     """

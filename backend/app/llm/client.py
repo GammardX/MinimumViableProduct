@@ -1,32 +1,33 @@
 import httpx
 import json
-from app.config import settings
 
-async def call_llm(messages: list[dict], url: str, model: str, key: str) -> str:
+async def call_llm(messages: list[dict], url: str, model: str, key: str = None) -> str:
     async with httpx.AsyncClient(timeout=120.0) as client:
         request_body = {
             "model": model,
             "messages": messages,
             "temperature": 0.1,
-            "options": {
+            "stream": True 
+        }
+
+        if "11434" in url or "zucchetti" in url:
+            request_body["options"] = {
                 "num_ctx": 4096,  
                 "num_gpu": 999, 
                 "num_thread": 8  
-            },
-            "stream": True 
-        }
+            }
+
+        headers = {"Content-Type": "application/json"}
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
 
         async with client.stream(
             "POST",
             url,
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-            },
+            headers=headers,
             json=request_body,
         ) as response:
-            response.raise_for_status()
-            
+            response.raise_for_status() 
             full_content = []
             
             async for line in response.aiter_lines():
