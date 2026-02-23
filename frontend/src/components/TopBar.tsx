@@ -1,5 +1,5 @@
 import {
-    Button,
+    Alert, Button,
     Dialog,
     DialogActions,
     DialogContent,
@@ -8,18 +8,13 @@ import {
     MenuItem,
     Slider,
     TextField,
-    Typography,
-    Alert 
+    Typography
 } from '@mui/material';
 import { useState } from 'react';
 import {
-    applySixHats,
-    improveWriting,
+    applySixHats, checkTextSimilarity, generateText, improveWriting,
     summarizeText,
-    translate,
-    generateText,
-    checkTextSimilarity,
-    type LLMResponse
+    translate, type LLMResponse
 } from '../services/llmService.ts';
 import '../style/topbar.css';
 
@@ -199,7 +194,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const openMenu = Boolean(anchorEl);
-    const handleMenuClose = () => setAnchorEl(null);
+    const handleSixHats = () => setAnchorEl(null);
 
     return (
         <>
@@ -216,12 +211,12 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
                         🧢 Analisi
                     </button>
                 </div>
-                <Menu anchorEl={anchorEl} open={openMenu} onClose={handleMenuClose}>
+                <Menu anchorEl={anchorEl} open={openMenu} onClose={handleSixHats}>
                     {sixHats.map((hat) => (
                         <MenuItem
                             key={hat.id} 
                             onClick={async () => {
-                                handleMenuClose();
+                                handleSixHats();
                                 llm.openLoadingDialog();
                                 try {
                                     const signal = llm.getAbortSignal();
