@@ -246,7 +246,7 @@ def generate_prompt(prompt: str, context_text: str = "", word_count: int = 300) 
     - Scrivi il testo seguendo fedelmente le indicazioni del prompt.
     - Se è presente un "TESTO DI CONTESTO", usalo come riferimento per stile, tono o continuazione logica.
     - FORMATTAZIONE OBBLIGATORIA: DEVI strutturare il testo usando il Markdown in modo ricco. Usa titoli (##, ###) per dividere le sezioni, liste puntate o numerate per elencare i punti chiave, e usa il **grassetto** per evidenziare i concetti più importanti. Non restituire un muro di testo continuo.
-    - Rispondi SOLO con il testo generato inserito nel JSON, non aggiungere tue introduzioni (es. "Ecco il testo richiesto:").
+    - STRICT OUTPUT: Rispondi SOLO con il testo generato inserito nel JSON. NON aggiungere introduzioni (es. "Ecco il testo:"). ASSOLUTAMENTE NON aggiungere note finali, disclaimer, conclusioni o commenti sul fatto che hai usato il Markdown o su quale lingua hai scelto (es. "Nota: Il testo è stato scritto in..."). Il testo deve contenere solo il contenuto richiesto, pronto per essere inserito in un documento.
 
     SCHEMA OUTPUT OBBLIGATORIO:
     {{
@@ -265,7 +265,7 @@ def generate_prompt(prompt: str, context_text: str = "", word_count: int = 300) 
     context_section = f"\n\nTESTO DI CONTESTO / RIFERIMENTO:\n<context>\n{context_text}\n</context>" if context_text.strip() else ""
 
     user_content = f"""
-    Scrivi un testo di circa {word_count} parole basato su questa richiesta assicurandoti di usare ampiamente la formattazione Markdown (Titoli ##, grassetti, liste):
+    Scrivi un testo di circa {word_count} parole basato su questa richiesta assicurandoti di usare ampiamente la formattazione Markdown (Titoli ##, grassetti, liste) e senza aggiungere nessuna nota finale:
     
     <prompt>
     {prompt}
