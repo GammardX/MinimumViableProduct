@@ -11,19 +11,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-env_origins = os.getenv("ALLOWED_ORIGINS")
+origins = [
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+    "https://gammardx.github.io", 
+]
 
+env_origins = os.getenv("ALLOWED_ORIGINS")
 if env_origins:
-    origins = env_origins.split(",")
-else:
-    # Fallback per lo sviluppo locale
-    origins = [
-        "http://localhost:5173",
-        "http://localhost:8000",
-        "http://localhost:4173",
-        "http://127.0.0.1:5173",
-        "http://padova.zucchetti.it:14000"
-    ]
+    for o in env_origins.split(","):
+        clean_origin = o.strip()
+        if clean_origin and clean_origin not in origins:
+            origins.append(clean_origin)
 
 app.add_middleware(
     CORSMiddleware,
