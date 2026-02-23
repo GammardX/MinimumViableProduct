@@ -23,8 +23,9 @@ interface TopBarProps {
     aiHistory?: Array<{ prompt: string; generatedText: string }>; 
     llm: {
         currentText: () => string;
-        hasSelection: () => boolean; // <-- NUOVO
-        openLoadingDialog: (type?: 'insert' | 'analysis' | 'summary') => void; 
+        hasSelection: () => boolean; 
+        getSelectionText: () => string; 
+        openLoadingDialog: (type?: 'insert' | 'analysis' | 'summary') => void;
         setDialogResult: (t: string, prompt?: string) => void; 
         getAbortSignal: () => AbortSignal; 
     };
@@ -62,13 +63,13 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     const [wordCount, setWordCount] = useState<number>(300);
 
     const handleGenerateClick = () => {
-        const text = llm.currentText();
+        const selection = llm.getSelectionText();
         let bestMatch = '';
         let maxSim = 0;
 
-        if (aiHistory && aiHistory.length > 0 && text.trim()) {
+        if (selection.length >= 30 && aiHistory && aiHistory.length > 0) {
             for (const history of aiHistory) {
-                const sim = checkTextSimilarity(text, history.generatedText);
+                const sim = checkTextSimilarity(selection, history.generatedText);
                 if (sim > maxSim) {
                     maxSim = sim;
                     bestMatch = history.prompt;

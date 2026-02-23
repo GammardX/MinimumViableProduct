@@ -135,6 +135,17 @@ export default function App() {
             return selectedText.trim() || activeNote?.content || '';
         },
 
+        getSelectionText: () => {
+            let selectedText = '';
+            if (editorInstance && editorInstance.codemirror) {
+                selectedText = editorInstance.codemirror.getSelection();
+            }
+            if (!selectedText) {
+                selectedText = window.getSelection()?.toString() || '';
+            }
+            return selectedText.trim();
+        },
+
         hasSelection: () => {
             let selectedText = '';
             if (editorInstance && editorInstance.codemirror) {
