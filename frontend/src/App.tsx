@@ -64,6 +64,12 @@ export default function App() {
     const [activeNoteId, setActiveNoteId] = useState<string>('');
     const [isLoaded, setIsLoaded] = useState(false);
 
+    const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
     // --- CARICAMENTO INIZIALE ---
     useEffect(() => {
         async function loadNotes() {
@@ -82,6 +88,11 @@ export default function App() {
                 console.error('Errore nel caricamento delle note:', error);
                 setNotes([WELCOME_NOTE]);
                 setActiveNoteId(WELCOME_NOTE.id);
+                setSnackbar({ 
+                    open: true, 
+                    message: 'Errore durante il caricamento delle note.', 
+                    severity: 'error' 
+                });
             } finally {
                 setIsLoaded(true);
             }
@@ -92,9 +103,14 @@ export default function App() {
     // --- AUTOSAVE ---
     useEffect(() => {
         if (!isLoaded) return;
-        set(DB_KEY, notes).catch((err) =>
-            console.error('Errore salvataggio:', err)
-        );
+        set(DB_KEY, notes).catch((err) => {
+            console.error('Errore salvataggio:', err);
+            setSnackbar({ 
+                open: true, 
+                message: 'Errore durante il salvataggio automatico della nota.', 
+                severity: 'error' 
+            });
+        });
     }, [notes, isLoaded]);
 
     const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
@@ -263,11 +279,15 @@ export default function App() {
         setDeleteDialogOpen(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!noteToDelete) return;
 
-        setNotes((prev) => {
-            const newNotes = prev.filter((n) => n.id !== noteToDelete);
+        const newNotes = notes.filter((n) => n.id !== noteToDelete);
+
+        try {
+            await set(DB_KEY, newNotes);
+
+            setNotes(newNotes);
             if (activeNoteId === noteToDelete) {
                 if (newNotes.length > 0) {
                     setActiveNoteId(newNotes[0].id);
@@ -275,11 +295,19 @@ export default function App() {
                     setActiveNoteId('');
                 }
             }
-            return newNotes;
-        });
+            setSnackbar({ open: true, message: 'Nota eliminata con successo!', severity: 'success' });
 
-        setDeleteDialogOpen(false);
-        setNoteToDelete(null);
+        } catch (error) {
+            console.error('Errore durante l\'eliminazione:', error);
+            setSnackbar({ 
+                open: true, 
+                message: 'Errore durante l\'eliminazione della nota dal database.', 
+                severity: 'error' 
+            });
+        } finally {
+            setDeleteDialogOpen(false);
+            setNoteToDelete(null);
+        }
     };
 
     const cancelDelete = () => {
@@ -385,12 +413,6 @@ export default function App() {
             });
         }
     };
-
-    const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
 
     const handleCopyInternalLink = () => {
         if (!activeNote) return;

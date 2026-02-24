@@ -41,6 +41,9 @@ class LLMClientAdapter(ILLMProvider):
                     provider["url"], messages, provider["model"], provider["key"], temperature
                 ):
                     full_content.append(chunk)
+
+                risposta_completa = "".join(full_content)
+                print(f"\n--- DEBUG RISPOSTA GREZZA [{provider['name']}] ---\n{risposta_completa}\n----------------------------------\n", flush=True)
                 
                 return "".join(full_content)
                 
