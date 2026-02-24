@@ -2,6 +2,7 @@
 Infrastructure: Dependency Injection Container
 Wiring di tutte le dipendenze dell'applicazione
 """
+import os
 from infrastructure.config import Settings
 from adapters.output import (
     LLMClientAdapter,
@@ -23,43 +24,35 @@ class DIContainer:
     Dependency Injection Container
     Configura e fornisce tutte le dipendenze dell'applicazione
     """
-    
     def __init__(self, settings: Settings):
         self._settings = settings
         self._instances = {}
 
     def _get_providers_list(self):
-        """Costruisce la lista dei provider partendo dalle variabili d'ambiente"""
-        return [
-            {
-                "name": "LOCALE",
-                "url": self._settings.LOCAL_LLM_URL,
-                "model": self._settings.LOCAL_LLM_MODEL,
-                "key": None,
-                "requires_key": False
-            },
-            {
-                "name": "GROQ",
-                "url": self._settings.GROQ_API_URL,
-                "model": self._settings.GROQ_MODEL,
-                "key": self._settings.GROQ_API_KEY,
-                "requires_key": True
-            },
-            {
-                "name": "GOOGLE",
-                "url": self._settings.GOOGLE_API_URL,
-                "model": self._settings.GOOGLE_MODEL,
-                "key": self._settings.GOOGLE_API_KEY,
-                "requires_key": True
-            },
-            {
-                "name": "ZUCCHETTI",
-                "url": self._settings.ZUCCHETTI_API_URL,
-                "model": self._settings.ZUCCHETTI_MODEL,
-                "key": self._settings.ZUCCHETTI_API_KEY,
-                "requires_key": True
-            },
-        ]
+        """Costruisce la lista dei provider dinamicamente in base all'ordine nel .env"""
+        providers = []
+        
+        order_str = os.getenv("LLM_FALLBACK_ORDER", "LOCAL")
+        
+        order_list = [p.strip().upper() for p in order_str.split(",") if p.strip()]
+
+        for prefix in order_list:
+            url = os.getenv(f"{prefix}_URL")
+            model = os.getenv(f"{prefix}_MODEL")
+            key = os.getenv(f"{prefix}_KEY") 
+            
+            if not url or not model:
+                print(f"[{prefix}] Saltato: URL o Model mancante nel file .env", flush=True)
+                continue
+
+            providers.append({
+                "name": prefix,
+                "url": url,
+                "model": model,
+                "key": key
+            })
+            
+        return providers
     
     def get_text_processor(self) -> TextProcessorService:
         if "text_processor" not in self._instances:

@@ -10,14 +10,23 @@ Tutta la documentazione relativa al progetto può essere visionata nella seguent
 File di esempio
 
 ```bash
-# Chiave api
-LLM_API_KEY=xx-xxxxxxxxxxxxxxxxxaxxxxx
+# Ordine tentativi ...
+LLM_FALLBACK_ORDER=LOCAL,GROQ,GOOGLE
 
-# Url Api
-LLM_API_URL=http://sito:porta/v1/chat/completions
+# LOCALE
+LOCAL_URL=http://host.docker.internal:11434/v1/chat/completions
+LOCAL_MODEL=modello
 
-# Modello
-LLM_MODEL=gpt-oss:20b
+# 2. GROQ
+GROQ_URL=https://api.groq.com/openai/v1/chat/completions
+GROQ_MODEL=modello
+GROQ_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 3. GOOGLE
+GOOGLE_URL=https://generativelanguage.googleapis.com/v1beta/openai/chat/completions
+GOOGLE_MODEL=modello
+GOOGLE_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
 ```
 
 # Usando docker

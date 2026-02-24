@@ -25,12 +25,8 @@ class LLMClientAdapter(ILLMProvider):
         last_error = None
 
         for provider in self._providers:
-            if not provider["url"] or not provider["model"]:
-                print(f"[{provider['name']}] Saltato: Variabili non configurate", flush=True)
-                continue
-            
-            if provider["requires_key"] and not provider["key"]:
-                print(f"[{provider['name']}] Saltato: API Key mancante", flush=True)
+            if not provider.get("url") or not provider.get("model"):
+                print(f"[{provider.get('name', 'Sconosciuto')}] Saltato: URL o Modello mancante", flush=True)
                 continue
 
             try:
@@ -38,14 +34,14 @@ class LLMClientAdapter(ILLMProvider):
                 
                 full_content = []
                 async for chunk in self._call_api_stream(
-                    provider["url"], messages, provider["model"], provider["key"], temperature
+                    provider["url"], messages, provider["model"], provider.get("key"), temperature
                 ):
                     full_content.append(chunk)
 
                 risposta_completa = "".join(full_content)
                 print(f"\n--- DEBUG RISPOSTA GREZZA [{provider['name']}] ---\n{risposta_completa}\n----------------------------------\n", flush=True)
                 
-                return "".join(full_content)
+                return risposta_completa
                 
             except Exception as e:
                 print(f"[{provider['name']}] Fallito: {str(e)}. Passo al prossimo fallback...", flush=True)
@@ -116,16 +112,15 @@ class LLMClientAdapter(ILLMProvider):
         last_error = None
         
         for provider in self._providers:
-            if not provider["url"] or not provider["model"]:
-                continue
-            if provider["requires_key"] and not provider["key"]:
+            if not provider.get("url") or not provider.get("model"):
                 continue
                 
             try:
                 async for chunk in self._call_api_stream(
-                    provider["url"], messages, provider["model"], provider["key"], temperature
+                    provider["url"], messages, provider["model"], provider.get("key"), temperature
                 ):
                     yield chunk
+                
                 return
                 
             except Exception as e:
