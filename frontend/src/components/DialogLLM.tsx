@@ -10,7 +10,7 @@ interface DialogLLMProps {
     text: string;
     open: boolean;
     loading: boolean;
-    actionType?: 'insert' | 'analysis' | 'summary'; 
+    actionType?: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate'; 
     onClose: () => void;
     onCancel?: () => void;
     onCopySuccess?: () => void;
@@ -82,7 +82,7 @@ export default function DialogLLM({
                             </Button>
                         )}
                         
-                        {!isInvalidResult && (actionType === 'analysis' || actionType === 'summary') && onCreateNewNote && (
+                        {!isInvalidResult && actionType !== 'insert' && onCreateNewNote && (
                             <Button onClick={onCreateNewNote} variant="contained" disabled={!text}>
                                 Salva come nota
                             </Button>

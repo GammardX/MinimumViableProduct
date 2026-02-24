@@ -1,3 +1,7 @@
+"""
+Infrastructure: Configuration
+Gestione configurazione applicazione con Pydantic
+"""
 from pydantic_settings import BaseSettings
 from typing import Optional
 

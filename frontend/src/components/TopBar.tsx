@@ -25,7 +25,7 @@ interface TopBarProps {
         currentText: () => string;
         hasSelection: () => boolean; 
         getSelectionText: () => string; 
-        openLoadingDialog: (type?: 'insert' | 'analysis' | 'summary') => void;
+        openLoadingDialog: (type?: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate') => void;
         setDialogResult: (t: string, prompt?: string) => void; 
         getAbortSignal: () => AbortSignal; 
     };
@@ -148,7 +148,8 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
 
     const handleConfirmImprove = async () => {
         setOpenCriterion(false);
-        llm.openLoadingDialog();
+        const isSelection = llm.hasSelection();
+        llm.openLoadingDialog(isSelection ? 'insert' : 'improve');
         try {
             const signal = llm.getAbortSignal();
             const result = await improveWriting(llm.currentText(), criterion, signal);
@@ -175,7 +176,8 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
 
     const handleConfirmTranslate = async () => {
         setOpenTargetLanguage(false);
-        llm.openLoadingDialog();
+        const isSelection = llm.hasSelection();
+        llm.openLoadingDialog(isSelection ? 'insert' : 'translate');
         try {
             const signal = llm.getAbortSignal();
             const result = await translate(llm.currentText(), targetLanguage, signal);

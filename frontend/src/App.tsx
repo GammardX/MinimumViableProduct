@@ -121,7 +121,7 @@ export default function App() {
     const [dialogLoading, setDialogLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
     const [dialogPrompt, setDialogPrompt] = useState('');
-    const [dialogActionType, setDialogActionType] = useState<'insert' | 'analysis' | 'summary'>('insert');
+    const [dialogActionType, setDialogActionType] = useState<'insert' | 'analysis' | 'summary' | 'improve' | 'translate'>('insert');
 
     const llmBridge = {
         currentText: () => {
@@ -157,7 +157,7 @@ export default function App() {
             return selectedText.trim().length > 0;
         },
 
-        openLoadingDialog: (type: 'insert' | 'analysis' | 'summary' = 'insert') => {
+        openLoadingDialog: (type: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate' = 'insert') => {
             setDialogActionType(type);
             setDialogText('');
             setDialogLoading(true);
@@ -209,7 +209,10 @@ export default function App() {
     const handleCreateNewNoteFromResult = () => {
         if (!activeNote) return;
         
-        const prefix = dialogActionType === 'summary' ? 'Riassunto' : 'Analisi';
+        let prefix = 'Analisi';
+        if (dialogActionType === 'summary') prefix = 'Riassunto';
+        else if (dialogActionType === 'improve') prefix = 'Miglioramento';
+        else if (dialogActionType === 'translate') prefix = 'Traduzione';
         
         const newNote: Note = {
             id: Date.now().toString(),
