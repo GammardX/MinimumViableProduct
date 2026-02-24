@@ -138,6 +138,7 @@ export default function App() {
     const abortControllerRef = useRef<AbortController | null>(null);
     const [dialogPrompt, setDialogPrompt] = useState('');
     const [dialogActionType, setDialogActionType] = useState<'insert' | 'analysis' | 'summary' | 'improve' | 'translate'>('insert');
+    const [dialogHasSelection, setDialogHasSelection] = useState(false); 
 
     const llmBridge = {
         currentText: () => {
@@ -178,6 +179,12 @@ export default function App() {
             setDialogText('');
             setDialogLoading(true);
             setDialogOpen(true);
+            
+            let isSel = false;
+            if (editorInstance && editorInstance.codemirror) {
+                isSel = editorInstance.codemirror.getSelection().trim().length > 0;
+            }
+            setDialogHasSelection(isSel);
         },
 
         setDialogResult: (text: string, prompt?: string) => {
@@ -200,11 +207,7 @@ export default function App() {
         }
     };
 
-    const handleInsertText = () => {
-        if (!editorInstance || !editorInstance.codemirror) return;
-        
-        editorInstance.codemirror.replaceSelection(dialogText + '\n\n');
-        
+    const finalizeAndSaveHistory = (successMessage: string) => {
         if (dialogPrompt) {
             setNotes(prev => prev.map(note => {
                 if (note.id === activeNoteId) {
@@ -217,9 +220,33 @@ export default function App() {
                 return note;
             }));
         }
-        
         setDialogOpen(false);
-        setSnackbar({ open: true, message: 'Testo inserito nel documento!', severity: 'success' });
+        setSnackbar({ open: true, message: successMessage, severity: 'success' });
+    };
+
+    const handleReplaceText = () => {
+        if (!editorInstance || !editorInstance.codemirror) return;
+        editorInstance.codemirror.replaceSelection(dialogText + '\n\n');
+        finalizeAndSaveHistory('Testo sostituito nel documento!');
+    };
+
+    const handleInsertBelowText = () => {
+        if (!editorInstance || !editorInstance.codemirror) return;
+        const cm = editorInstance.codemirror;
+        
+        const selections = cm.listSelections();
+        if (selections.length > 0) {
+            const sel = selections[0];
+            const isAnchorBelow = sel.anchor.line > sel.head.line || 
+                                 (sel.anchor.line === sel.head.line && sel.anchor.ch > sel.head.ch);
+            const endPos = isAnchorBelow ? sel.anchor : sel.head;
+            
+            cm.replaceRange('\n\n' + dialogText + '\n\n', endPos);
+        } else {
+            cm.replaceSelection(dialogText + '\n\n');
+        }
+        
+        finalizeAndSaveHistory('Testo inserito in coda al capitolo!');
     };
 
     const handleCreateNewNoteFromResult = () => {
@@ -521,7 +548,7 @@ export default function App() {
                 )}
             </div>
 
-            {/* FEEDBACK SNACKBAR UNIFICATA */}
+            {/* FEEDBACK SNACKBAR */}
             <Snackbar
                 open={snackbar.open}
                 autoHideDuration={3000}
@@ -544,10 +571,12 @@ export default function App() {
                 open={dialogOpen}
                 loading={dialogLoading}
                 actionType={dialogActionType}
+                hasSelection={dialogHasSelection}
                 onClose={handleCloseLLMDialog}
                 onCancel={llmBridge.abortCurrent} 
                 onCopySuccess={handleCopyLLMText} 
-                onInsert={handleInsertText} 
+                onReplace={handleReplaceText} 
+                onInsertBelow={handleInsertBelowText} 
                 onCreateNewNote={handleCreateNewNoteFromResult} 
             />
 

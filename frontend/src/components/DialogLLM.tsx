@@ -11,10 +11,12 @@ interface DialogLLMProps {
     open: boolean;
     loading: boolean;
     actionType?: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate'; 
+    hasSelection?: boolean; 
     onClose: () => void;
     onCancel?: () => void;
     onCopySuccess?: () => void;
-    onInsert?: () => void;
+    onReplace?: () => void;
+    onInsertBelow?: () => void; 
     onCreateNewNote?: () => void;
 }
 
@@ -23,10 +25,12 @@ export default function DialogLLM({
     open,
     loading,
     actionType = 'insert',
+    hasSelection = false,
     onClose,
     onCancel,
     onCopySuccess,
-    onInsert,
+    onReplace,
+    onInsertBelow,
     onCreateNewNote 
 }: DialogLLMProps) {
     const isInvalidResult = 
@@ -76,10 +80,23 @@ export default function DialogLLM({
                     </Button>
                 ) : (
                     <>
-                        {!isInvalidResult && actionType === 'insert' && onInsert && (
-                            <Button onClick={onInsert} variant="contained" disabled={!text}>
-                                Inserisci
-                            </Button>
+                        {!isInvalidResult && actionType === 'insert' && (
+                            <>
+                                {hasSelection ? (
+                                    <>
+                                        <Button onClick={onReplace} variant="outlined" disabled={!text}>
+                                            Sostituisci Testo
+                                        </Button>
+                                        <Button onClick={onInsertBelow} variant="contained" disabled={!text}>
+                                            Inserisci Sotto
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <Button onClick={onReplace} variant="contained" disabled={!text}>
+                                        Inserisci Testo
+                                    </Button>
+                                )}
+                            </>
                         )}
                         
                         {!isInvalidResult && actionType !== 'insert' && onCreateNewNote && (

@@ -40,6 +40,46 @@ export default function MarkdownEditor({
                 'bold',
                 'italic',
                 'heading',
+                {
+                    name: "select-chapter",
+                    action: (editor: EasyMDE) => {
+                        const cm = editor.codemirror;
+                        const cursor = cm.getCursor();
+                        let startLine = 0;
+                        let headingLevel = 0;
+                        
+                        for (let i = cursor.line; i >= 0; i--) {
+                            const match = cm.getLine(i).match(/^(#{1,6})\s/);
+                            if (match) {
+                                startLine = i;
+                                headingLevel = match[1].length;
+                                break;
+                            }
+                        }
+                        
+                        let endLine = cm.lineCount() - 1;
+                        let endChar = cm.getLine(endLine).length;
+                        
+                        if (headingLevel > 0) {
+                            for (let i = startLine + 1; i < cm.lineCount(); i++) {
+                                const match = cm.getLine(i).match(/^(#{1,6})\s/);
+                                if (match && match[1].length <= headingLevel) {
+                                    endLine = i - 1; 
+                                    endChar = Math.max(0, cm.getLine(endLine).length);
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        cm.setSelection(
+                            { line: startLine, ch: 0 }, 
+                            { line: endLine, ch: endChar }
+                        );
+                        cm.focus(); 
+                    },
+                    className: "fa fa-bookmark", 
+                    title: "Seleziona l'intero capitolo",
+                },
                 '|',
                 'code',
                 'quote',
@@ -52,7 +92,7 @@ export default function MarkdownEditor({
                 '|',
                 'preview',
                 'side-by-side'
-            ] as const
+            ] as any 
         };
     }, []);
 
