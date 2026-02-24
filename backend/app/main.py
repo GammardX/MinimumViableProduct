@@ -44,13 +44,6 @@ async def run_llm_request(messages: list[dict]):
             "requires_key": False
         },
         {
-            "name": "ZUCCHETTI",
-            "url": settings.ZUCCHETTI_API_URL,
-            "model": settings.ZUCCHETTI_MODEL,
-            "key": settings.ZUCCHETTI_API_KEY,
-            "requires_key": True
-        },
-        {
             "name": "GROQ",
             "url": settings.GROQ_API_URL,
             "model": settings.GROQ_MODEL,
@@ -63,22 +56,29 @@ async def run_llm_request(messages: list[dict]):
             "model": settings.GOOGLE_MODEL,
             "key": settings.GOOGLE_API_KEY,
             "requires_key": True
-        }
+        },
+        {
+            "name": "ZUCCHETTI",
+            "url": settings.ZUCCHETTI_API_URL,
+            "model": settings.ZUCCHETTI_MODEL,
+            "key": settings.ZUCCHETTI_API_KEY,
+            "requires_key": True
+        },
     ]
 
     last_error = None
 
     for provider in providers:
         if not provider["url"] or not provider["model"]:
-            print(f"[{provider['name']}] Saltato: Variabili non configurate nel file .env")
+            print(f"[{provider['name']}] Saltato: Variabili non configurate nel file .env", flush=True)
             continue
         
         if provider["requires_key"] and not provider["key"]:
-            print(f"[{provider['name']}] Saltato: API Key mancante")
+            print(f"[{provider['name']}] Saltato: API Key mancante", flush=True)
             continue
 
         try:
-            print(f"Tento la generazione con: {provider['name']} (Modello: {provider['model']})")
+            print(f"Tento la generazione con: {provider['name']} (Modello: {provider['model']})", flush=True)
             
             raw = await call_llm(
                 messages, 
@@ -89,13 +89,13 @@ async def run_llm_request(messages: list[dict]):
             return extract_json(raw)
             
         except asyncio.CancelledError:
-            print("Chiamata annullata dal client frontend.")
+            print("Chiamata annullata dal client frontend.", flush=True)
             raise
         except Exception as e:
-            print(f"[{provider['name']}] Fallito: {str(e)}. Passo al prossimo fallback...")
+            print(f"[{provider['name']}] Fallito: {str(e)}. Passo al prossimo fallback...", flush=True)
             last_error = e
 
-    print("Tutti i provider LLM sono falliti o non configurati.")
+    print("Tutti i provider LLM sono falliti o non configurati.", flush=True)
     raise HTTPException(
         status_code=500, 
         detail=f"Errore critico: Nessun servizio AI disponibile al momento. Ultimo errore: {str(last_error)}"
