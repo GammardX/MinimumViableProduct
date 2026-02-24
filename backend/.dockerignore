@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Ambienti Virtuali
+.venv/
+venv/
+env/
+ENV/
+
+# Cache di Python e file compilati
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+.tox/
+
+# Variabili d'ambiente e segreti 
+.env
+*.pem
+*.key
+
+# File di sistema e IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Log
+logs/
+*.log
