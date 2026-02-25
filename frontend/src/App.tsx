@@ -1,600 +1,254 @@
-import { get, set } from 'idb-keyval';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+	Alert,
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Snackbar,
+	Typography
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import DialogLLM from './components/DialogLLM';
 import FileSidebar from './components/FileSidebar';
 import MarkdownEditor from './components/MarkdownEditor';
 import TopBar from './components/TopBar';
-import { fileService } from './services/fileService';
 import { wakeUpServer } from './services/llmService';
-import { Alert, Snackbar, Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material';
 import './style/main.css';
 
-// --- TIPI ---
-export interface Note {
-    id: string;
-    title: string;
-    content: string;
-    createdAt: number;
-    aiHistory?: Array<{ prompt: string; generatedText: string }>; 
-}
-
-const WELCOME_NOTE: Note = {
-    id: Date.now().toString(),
-    title: 'Benvenuto',
-    content: `# Benvenuto nel tuo Editor!\n\nQuesta nota è stata creata automaticamente.\n\n## Funzionalità:\n* Le note vengono **salvate automaticamente** nel browser.\n* Puoi usare l'AI per riassumere o tradurre.\n* Usa la sidebar per creare nuovi fogli.`,
-    createdAt: Date.now()
-};
-
-const DB_KEY = 'my-markdown-notes';
-
-const getPreviewStats = (markdown: string) => {
-    if (!markdown) return { words: 0, chars: 0 };
-    
-    const plainText = markdown
-        .replace(/#+\s/g, '') 
-        .replace(/(\*\*|__)(.*?)\1/g, '$2') 
-        .replace(/(\*|_)(.*?)\1/g, '$2') 
-        .replace(/~~(.*?)~~/g, '$1')
-        .replace(/!\[.*?\]\(.*?\)/g, '') 
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .replace(/`{1,3}([^`]+)`{1,3}/g, '$1') 
-        .replace(/^\s*[>\-\*\+]\s+/gm, '') 
-        .replace(/^\s*\d+\.\s+/gm, '');
-
-    const chars = plainText.length;
-    const words = plainText.trim().split(/\s+/).filter(w => w.length > 0).length;
-
-    return { words, chars };
-};
+import { useLLMDialog } from './hooks/useLLMDialog';
+import { useNavigation } from './hooks/useNavigation';
+import { useNotesManager } from './hooks/useNotesManager';
+import { useSidebarResize } from './hooks/useSidebarResize';
+import { getPreviewStats } from './hooks/useWordsCounter';
 
 export default function App() {
-    // --- RISVEGLIO SERVER ---
-    useEffect(() => {
-    wakeUpServer();
-    const intervalId = setInterval(() => {
-      wakeUpServer();
-    }, 14 * 60 * 1000);
+	// --- STATO SNACKBAR (condiviso tra hooks) ---
+	const [snackbar, setSnackbar] = useState<{
+		open: boolean;
+		message: string;
+		severity: 'success' | 'error';
+	}>({
+		open: false,
+		message: '',
+		severity: 'success'
+	});
 
-    return () => clearInterval(intervalId);
+	const handleCloseSnackbar = (
+		_event?: React.SyntheticEvent | Event,
+		reason?: string
+	) => {
+		if (reason === 'clickaway') return;
+		setSnackbar((prev) => ({ ...prev, open: false }));
+	};
 
-    }, []);
+	// --- RISVEGLIO SERVER ---
+	useEffect(() => {
+		wakeUpServer();
+		const intervalId = setInterval(() => wakeUpServer(), 14 * 60 * 1000);
+		return () => clearInterval(intervalId);
+	}, []);
 
-    // --- STATO DATI ---
-    const [notes, setNotes] = useState<Note[]>([]);
-    const [activeNoteId, setActiveNoteId] = useState<string>('');
-    const [isLoaded, setIsLoaded] = useState(false);
+	// --- GESTIONE NOTE ---
+	const {
+		notes,
+		setNotes,
+		activeNoteId,
+		setActiveNoteId,
+		activeNote,
+		isLoaded,
+		deleteDialogOpen,
+		handleCreateNote,
+		handleDeleteNote,
+		confirmDelete,
+		cancelDelete,
+		handleRenameNote,
+		handleImportNote,
+		handleExportNote,
+		handleUpdateNote
+	} = useNotesManager(setSnackbar);
 
-    const [snackbar, setSnackbar] = useState<{open: boolean, message: string, severity: 'success' | 'error'}>({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
+	// --- RESIZING SIDEBAR ---
+	const {
+		sidebarWidth,
+		isResizing,
+		sidebarRef,
+		startResizing,
+		handleResizerClick
+	} = useSidebarResize();
 
-    // --- CARICAMENTO INIZIALE ---
-    useEffect(() => {
-        async function loadNotes() {
-            try {
-                const savedNotes = await get<Note[]>(DB_KEY);
+	// --- EDITOR INSTANCE ---
+	const [editorInstance, setEditorInstance] = useState<any>(null);
 
-                if (savedNotes && savedNotes.length > 0) {
-                    setNotes(savedNotes);
-                    setActiveNoteId(savedNotes[0].id);
-                } else {
-                    setNotes([WELCOME_NOTE]);
-                    setActiveNoteId(WELCOME_NOTE.id);
-                    await set(DB_KEY, [WELCOME_NOTE]);
-                }
-            } catch (error) {
-                console.error('Errore nel caricamento delle note:', error);
-                setNotes([WELCOME_NOTE]);
-                setActiveNoteId(WELCOME_NOTE.id);
-                setSnackbar({ 
-                    open: true, 
-                    message: 'Errore durante il caricamento delle note.', 
-                    severity: 'error' 
-                });
-            } finally {
-                setIsLoaded(true);
-            }
-        }
-        loadNotes();
-    }, []);
+	// --- DIALOG LLM ---
+	const {
+		dialogOpen,
+		dialogText,
+		dialogLoading,
+		dialogActionType,
+		dialogHasSelection,
+		llmBridge,
+		handleReplaceText,
+		handleInsertBelowText,
+		handleCreateNewNoteFromResult,
+		handleCloseLLMDialog,
+		handleCopyLLMText
+	} = useLLMDialog(
+		editorInstance,
+		activeNote,
+		activeNoteId,
+		setNotes,
+		setSnackbar
+	);
 
-    // --- AUTOSAVE ---
-    useEffect(() => {
-        if (!isLoaded) return;
-        set(DB_KEY, notes).catch((err) => {
-            console.error('Errore salvataggio:', err);
-            setSnackbar({ 
-                open: true, 
-                message: 'Errore durante il salvataggio automatico della nota.', 
-                severity: 'error' 
-            });
-        });
-    }, [notes, isLoaded]);
+	// --- NAVIGAZIONE ---
+	const { handleNavigate, handleCopyInternalLink } = useNavigation(
+		notes,
+		activeNote,
+		setActiveNoteId,
+		setSnackbar
+	);
 
-    const activeNote = notes.find((n) => n.id === activeNoteId) || notes[0];
+	if (!isLoaded) {
+		return <div className='loading-screen'>Caricamento note...</div>;
+	}
 
-    // --- STATO LAYOUT ---
-    const [sidebarWidth, setSidebarWidth] = useState(250);
-    const [isResizing, setIsResizing] = useState(false);
-    const sidebarRef = useRef<HTMLDivElement>(null);
-    const startWidthRef = useRef(0); 
+	return (
+		<div className={`app-container ${isResizing ? 'is-resizing' : ''}`}>
+			{/* SIDEBAR SINISTRA */}
+			<div
+				className='sidebar-wrapper'
+				style={{ width: sidebarWidth }}
+				ref={sidebarRef}>
+				<FileSidebar
+					notes={notes}
+					activeId={activeNoteId}
+					onSelect={setActiveNoteId}
+					onCreate={handleCreateNote}
+					onDelete={handleDeleteNote}
+					onRename={handleRenameNote}
+					onImport={handleImportNote}
+					onExport={handleExportNote}
+				/>
+			</div>
 
-    // --- GESTIONE NOTE ---
-    const handleUpdateNote = (newText: string) => {
-        setNotes((prev) =>
-            prev.map((note) =>
-                note.id === activeNoteId ? { ...note, content: newText } : note
-            )
-        );
-    };
+			{/* MANIGLIA DI RIDIMENSIONAMENTO */}
+			<div
+				className={`resizer ${sidebarWidth === 10 || isResizing ? 'active' : ''}`}
+				onMouseDown={startResizing}
+				onClick={handleResizerClick}
+			/>
 
-    // --- GESTIONE LLM DIALOG ---
-    const [editorInstance, setEditorInstance] = useState<any>(null);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogText, setDialogText] = useState('');
-    const [dialogLoading, setDialogLoading] = useState(false);
-    const abortControllerRef = useRef<AbortController | null>(null);
-    const [dialogPrompt, setDialogPrompt] = useState('');
-    const [dialogActionType, setDialogActionType] = useState<'insert' | 'analysis' | 'summary' | 'improve' | 'translate'>('insert');
-    const [dialogHasSelection, setDialogHasSelection] = useState(false); 
+			{/* AREA PRINCIPALE */}
+			<div className='main-content'>
+				{activeNote ? (
+					<>
+						<TopBar
+							title={activeNote.title}
+							llm={llmBridge}
+							aiHistory={activeNote.aiHistory}
+						/>
 
-    const llmBridge = {
-        currentText: () => {
-            let selectedText = '';
-            if (editorInstance && editorInstance.codemirror) {
-                selectedText = editorInstance.codemirror.getSelection();
-            }
-            if (!selectedText) {
-                selectedText = window.getSelection()?.toString() || '';
-            }
-            return selectedText.trim() || activeNote?.content || '';
-        },
+						<div className='editor-wrapper'>
+							<MarkdownEditor
+								key={activeNote.id}
+								initialValue={activeNote.content}
+								onChange={handleUpdateNote}
+								onNavigate={handleNavigate}
+								onInstanceReady={setEditorInstance}
+							/>
+						</div>
 
-        getSelectionText: () => {
-            let selectedText = '';
-            if (editorInstance && editorInstance.codemirror) {
-                selectedText = editorInstance.codemirror.getSelection();
-            }
-            if (!selectedText) {
-                selectedText = window.getSelection()?.toString() || '';
-            }
-            return selectedText.trim();
-        },
+						{/* STATUS BAR */}
+						<div className='status-bar'>
+							<div className='status-left'>
+								{getPreviewStats(activeNote.content).words} parole |{' '}
+								{getPreviewStats(activeNote.content).chars} caratteri
+							</div>
+							<div
+								className='status-right'
+								onClick={handleCopyInternalLink}
+								title='Clicca per copiare il link interno per questa nota'>
+								<span>ID Nota: {activeNote.id}</span>
+							</div>
+						</div>
+					</>
+				) : (
+					<div className='empty-state-container'>
+						<div className='empty-state-card'>
+							<div className='empty-state-icon'>📝</div>
+							<h1>Inizia a scrivere</h1>
+							<p>
+								Non hai selezionato nessuna nota. Crea un nuovo foglio o
+								importane uno esistente per iniziare a lavorare.
+							</p>
+							<div className='empty-state-actions'>
+								<button
+									onClick={handleCreateNote}
+									className='empty-state-primary-btn'>
+									+ Nuova Nota
+								</button>
+								<button
+									onClick={handleImportNote}
+									className='empty-state-secondary-btn'>
+									📂 Importa File
+								</button>
+							</div>
+						</div>
+					</div>
+				)}
+			</div>
 
-        hasSelection: () => {
-            let selectedText = '';
-            if (editorInstance && editorInstance.codemirror) {
-                selectedText = editorInstance.codemirror.getSelection();
-            }
-            if (!selectedText) {
-                selectedText = window.getSelection()?.toString() || '';
-            }
-            return selectedText.trim().length > 0;
-        },
+			{/* FEEDBACK SNACKBAR */}
+			<Snackbar
+				open={snackbar.open}
+				autoHideDuration={3000}
+				onClose={handleCloseSnackbar}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+				<Alert
+					onClose={handleCloseSnackbar}
+					severity={snackbar.severity}
+					sx={{ width: '100%' }}
+					className='custom-snackbar'>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
 
-        openLoadingDialog: (type: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate' = 'insert') => {
-            setDialogActionType(type);
-            setDialogText('');
-            setDialogLoading(true);
-            setDialogOpen(true);
-            
-            let isSel = false;
-            if (editorInstance && editorInstance.codemirror) {
-                isSel = editorInstance.codemirror.getSelection().trim().length > 0;
-            }
-            setDialogHasSelection(isSel);
-        },
+			{/* DIALOG LLM */}
+			<DialogLLM
+				text={dialogText}
+				open={dialogOpen}
+				loading={dialogLoading}
+				actionType={dialogActionType}
+				hasSelection={dialogHasSelection}
+				onClose={handleCloseLLMDialog}
+				onCancel={llmBridge.abortCurrent}
+				onCopySuccess={handleCopyLLMText}
+				onReplace={handleReplaceText}
+				onInsertBelow={handleInsertBelowText}
+				onCreateNewNote={handleCreateNewNoteFromResult}
+			/>
 
-        setDialogResult: (text: string, prompt?: string) => {
-            setDialogLoading(false);
-            setDialogText(text);
-            if (prompt) setDialogPrompt(prompt);
-        },
-
-        getAbortSignal: () => {
-            abortControllerRef.current = new AbortController();
-            return abortControllerRef.current.signal;
-        },
-
-        abortCurrent: () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-            setDialogLoading(false);
-            setDialogText('Generazione annullata dall\'utente.');
-        }
-    };
-
-    const finalizeAndSaveHistory = (successMessage: string) => {
-        if (dialogPrompt) {
-            setNotes(prev => prev.map(note => {
-                if (note.id === activeNoteId) {
-                    const history = note.aiHistory || [];
-                    return { 
-                        ...note, 
-                        aiHistory: [...history, { prompt: dialogPrompt, generatedText: dialogText }] 
-                    };
-                }
-                return note;
-            }));
-        }
-        setDialogOpen(false);
-        setSnackbar({ open: true, message: successMessage, severity: 'success' });
-    };
-
-    const handleReplaceText = () => {
-        if (!editorInstance || !editorInstance.codemirror) return;
-        editorInstance.codemirror.replaceSelection(dialogText + '\n\n');
-        finalizeAndSaveHistory('Testo sostituito nel documento!');
-    };
-
-    const handleInsertBelowText = () => {
-        if (!editorInstance || !editorInstance.codemirror) return;
-        const cm = editorInstance.codemirror;
-        
-        const selections = cm.listSelections();
-        if (selections.length > 0) {
-            const sel = selections[0];
-            const isAnchorBelow = sel.anchor.line > sel.head.line || 
-                                 (sel.anchor.line === sel.head.line && sel.anchor.ch > sel.head.ch);
-            const endPos = isAnchorBelow ? sel.anchor : sel.head;
-            
-            cm.replaceRange('\n\n' + dialogText + '\n\n', endPos);
-        } else {
-            cm.replaceSelection(dialogText + '\n\n');
-        }
-        
-        finalizeAndSaveHistory('Testo inserito in coda al capitolo!');
-    };
-
-    const handleCreateNewNoteFromResult = () => {
-        if (!activeNote) return;
-        
-        let prefix = 'Analisi';
-        if (dialogActionType === 'summary') prefix = 'Riassunto';
-        else if (dialogActionType === 'improve') prefix = 'Miglioramento';
-        else if (dialogActionType === 'translate') prefix = 'Traduzione';
-        
-        const newNote: Note = {
-            id: Date.now().toString(),
-            title: `${prefix}: ${activeNote.title}`,
-            content: dialogText,
-            createdAt: Date.now()
-        };
-        
-        setNotes((prev) => [...prev, newNote]);
-        setActiveNoteId(newNote.id);
-        setDialogOpen(false);
-        setSnackbar({ open: true, message: `Nota creata con successo!`, severity: 'success' });
-    };
-
-    const handleCloseLLMDialog = () => {
-        if (dialogLoading) {
-            llmBridge.abortCurrent();
-        }
-        setDialogOpen(false);
-    };
-
-    useEffect(() => {
-        return () => {
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
-        };
-    }, []);
-
-    const handleCreateNote = () => {
-        const newNote: Note = {
-            id: Date.now().toString(),
-            title: 'Nuova Nota',
-            content: '# Titolo\nInizia a scrivere...',
-            createdAt: Date.now()
-        };
-        setNotes((prev) => [...prev, newNote]);
-        setActiveNoteId(newNote.id);
-    };
-
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
-
-    // --- GESTIONE ELIMINAZIONE NOTA ---
-    const handleDeleteNote = (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        setNoteToDelete(id);
-        setDeleteDialogOpen(true);
-    };
-
-    const confirmDelete = async () => {
-        if (!noteToDelete) return;
-
-        const newNotes = notes.filter((n) => n.id !== noteToDelete);
-
-        try {
-            await set(DB_KEY, newNotes);
-
-            setNotes(newNotes);
-            if (activeNoteId === noteToDelete) {
-                if (newNotes.length > 0) {
-                    setActiveNoteId(newNotes[0].id);
-                } else {
-                    setActiveNoteId('');
-                }
-            }
-            setSnackbar({ open: true, message: 'Nota eliminata con successo!', severity: 'success' });
-
-        } catch (error) {
-            console.error('Errore durante l\'eliminazione:', error);
-            setSnackbar({ 
-                open: true, 
-                message: 'Errore durante l\'eliminazione della nota dal database.', 
-                severity: 'error' 
-            });
-        } finally {
-            setDeleteDialogOpen(false);
-            setNoteToDelete(null);
-        }
-    };
-
-    const cancelDelete = () => {
-        setDeleteDialogOpen(false);
-        setNoteToDelete(null);
-    };
-
-    const handleRenameNote = (id: string, newTitle: string) => {
-        setNotes((prevNotes) =>
-            prevNotes.map((note) =>
-                note.id === id ? { ...note, title: newTitle } : note
-            )
-        );
-    };
-
-    const handleImportNote = async () => {
-        const data = await fileService.importFile();
-        if (data) {
-            const newNote: Note = {
-                id: Date.now().toString(),
-                title: data.title,
-                content: data.content,
-                createdAt: Date.now()
-            };
-            setNotes(prev => [...prev, newNote]);
-            setActiveNoteId(newNote.id);
-        }
-    };
-
-    const handleExportNote = async (id: string) => {
-        const note = notes.find(n => n.id === id);
-        if (note) {
-            await fileService.exportFile(note.title, note.content);
-        }
-    };
-
-    // --- LOGICA RESIZING SIDEBAR ---
-    const startResizing = useCallback(() => {
-        setIsResizing(true);
-        startWidthRef.current = sidebarWidth;
-    }, [sidebarWidth]);
-
-    const stopResizing = useCallback(() => setIsResizing(false), []);
-
-    const resize = useCallback(
-        (mouseMoveEvent: MouseEvent) => {
-            if (isResizing) {
-                const newWidth = mouseMoveEvent.clientX;
-                if (newWidth <= 100) {
-                    setSidebarWidth(10);
-                } else if (newWidth < 600) {
-                    setSidebarWidth(newWidth);
-                }
-            }
-        },
-        [isResizing]
-    );
-
-    const handleResizerClick = () => {
-        if (startWidthRef.current === 10 && sidebarWidth === 10) {
-            setSidebarWidth(250);
-        }
-    };
-
-    useEffect(() => {
-        window.addEventListener('mousemove', resize);
-        window.addEventListener('mouseup', stopResizing);
-        return () => {
-            window.removeEventListener('mousemove', resize);
-            window.removeEventListener('mouseup', stopResizing);
-        };
-    }, [resize, stopResizing]);
-
-    // --- NAVIGAZIONE TRA NOTE ---
-    const handleNavigate = (target: string, anchor?: string) => {
-        const decodedTarget = decodeURIComponent(target);
-
-        let noteToOpen = notes.find((n) => n.id === decodedTarget);
-
-        if (!noteToOpen) {
-            noteToOpen = notes.find(
-                (n) => n.title.toLowerCase() === decodedTarget.toLowerCase()
-            );
-        }
-
-        if (noteToOpen) {
-            setActiveNoteId(noteToOpen.id);
-
-            if (anchor) {
-                setTimeout(() => {
-                    const elementId = anchor.toLowerCase().replace(/\s+/g, '');
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }, 200);
-            }
-        } else {
-            setSnackbar({ 
-                open: true, 
-                message: `Nota "${decodedTarget}" non trovata!`, 
-                severity: 'error' 
-            });
-        }
-    };
-
-    const handleCopyInternalLink = () => {
-        if (!activeNote) return;
-        const linkStr = `[Vai a ${activeNote.title}](#note:${activeNote.id})`;
-        navigator.clipboard.writeText(linkStr)
-            .then(() => setSnackbar({ 
-                open: true, 
-                message: "Ancoraggio copiato: ora incollalo in un'altra nota!", 
-                severity: 'success' 
-            }))
-            .catch(err => console.error("Errore nella copia del link:", err));
-    };
-
-    const handleCopyLLMText = () => {
-        setSnackbar({ 
-            open: true, 
-            message: "Testo copiato negli appunti!", 
-            severity: 'success' 
-        });
-    };
-
-    const handleCloseSnackbar = (_event?: React.SyntheticEvent | Event, reason?: string) => {
-        if (reason === 'clickaway') return;
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
-
-    if (!isLoaded) {
-        return <div className='loading-screen'>Caricamento note...</div>;
-    }
-
-    return (
-        <div 
-            className={`app-container ${isResizing ? 'is-resizing' : ''}`}
-        >
-            {/* SIDEBAR SINISTRA */}
-            <div
-                className='sidebar-wrapper'
-                style={{ width: sidebarWidth }}
-                ref={sidebarRef}>
-                <FileSidebar
-                    notes={notes}
-                    activeId={activeNoteId}
-                    onSelect={setActiveNoteId}
-                    onCreate={handleCreateNote}
-                    onDelete={handleDeleteNote}
-                    onRename={handleRenameNote}
-                    onImport={handleImportNote} 
-                    onExport={handleExportNote} 
-                />
-            </div>
-
-            {/* MANIGLIA DI RIDIMENSIONAMENTO */}
-            <div 
-                className={`resizer ${(sidebarWidth === 10 || isResizing) ? 'active' : ''}`} 
-                onMouseDown={startResizing} 
-                onClick={handleResizerClick}
-            />
-
-            {/* AREA PRINCIPALE */}
-            <div className='main-content'>
-                {activeNote ? (
-                    <>
-                        <TopBar title={activeNote.title} llm={llmBridge} aiHistory={activeNote.aiHistory}/>
-                        
-                        {/* --- EDITOR MARKDOWN --- */}
-                        <div className='editor-wrapper'>
-                            <MarkdownEditor
-                                key={activeNote.id}
-                                initialValue={activeNote.content}
-                                onChange={handleUpdateNote}
-                                onNavigate={handleNavigate}
-                                onInstanceReady={setEditorInstance} 
-                            />
-                        </div>
-                        
-                        {/* --- STATUS BAR --- */}
-                        <div className="status-bar">
-                            <div className="status-left">
-                                {getPreviewStats(activeNote.content).words} parole | {getPreviewStats(activeNote.content).chars} caratteri
-                            </div>
-                            <div 
-                                className="status-right" 
-                                onClick={handleCopyInternalLink}
-                                title="Clicca per copiare il link interno per questa nota"
-                            >
-                                <span>ID Nota: {activeNote.id}</span>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className='empty-state-container'>
-                        <div className='empty-state-card'>
-                            <div className='empty-state-icon'>📝</div>
-                            <h1>Inizia a scrivere</h1>
-                            <p>Non hai selezionato nessuna nota. Crea un nuovo foglio o importane uno esistente per iniziare a lavorare.</p>
-                            <div className='empty-state-actions'>
-                                <button onClick={handleCreateNote} className='empty-state-primary-btn'>
-                                    + Nuova Nota
-                                </button>
-                                <button onClick={handleImportNote} className='empty-state-secondary-btn'>
-                                    📂 Importa File
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* FEEDBACK SNACKBAR */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert 
-                    onClose={handleCloseSnackbar} 
-                    severity={snackbar.severity} 
-                    sx={{ width: '100%' }}
-                    className="custom-snackbar"
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
-
-            {/* DIALOG LLM */}
-            <DialogLLM
-                text={dialogText}
-                open={dialogOpen}
-                loading={dialogLoading}
-                actionType={dialogActionType}
-                hasSelection={dialogHasSelection}
-                onClose={handleCloseLLMDialog}
-                onCancel={llmBridge.abortCurrent} 
-                onCopySuccess={handleCopyLLMText} 
-                onReplace={handleReplaceText} 
-                onInsertBelow={handleInsertBelowText} 
-                onCreateNewNote={handleCreateNewNoteFromResult} 
-            />
-
-            {/* DIALOG CONFERMA ELIMINAZIONE */}
-            <Dialog open={deleteDialogOpen} onClose={cancelDelete}>
-                <DialogTitle>Conferma eliminazione</DialogTitle>
-                <DialogContent>
-                    <Typography>
-                        Sei sicuro di voler eliminare questa nota? L'operazione non può essere annullata.
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={cancelDelete}>Annulla</Button>
-                    <Button onClick={confirmDelete} color="error" variant="contained" sx={{ color: 'white' }}>
-                        Elimina
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
+			{/* DIALOG CONFERMA ELIMINAZIONE */}
+			<Dialog open={deleteDialogOpen} onClose={cancelDelete}>
+				<DialogTitle>Conferma eliminazione</DialogTitle>
+				<DialogContent>
+					<Typography>
+						Sei sicuro di voler eliminare questa nota? L'operazione non può
+						essere annullata.
+					</Typography>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={cancelDelete}>Annulla</Button>
+					<Button
+						onClick={confirmDelete}
+						color='error'
+						variant='contained'
+						sx={{ color: 'white' }}>
+						Elimina
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</div>
+	);
 }
