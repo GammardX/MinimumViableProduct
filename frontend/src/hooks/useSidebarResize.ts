@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 interface UseSidebarResizeReturn {
     sidebarWidth: number;
     isResizing: boolean;
-    sidebarRef: React.RefObject<HTMLDivElement>;
+    sidebarRef: React.RefObject<HTMLDivElement | null>;
     startResizing: () => void;
     handleResizerClick: () => void;
 }
