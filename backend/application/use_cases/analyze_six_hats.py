@@ -3,7 +3,6 @@ Use Case: Analyze Six Hats
 Analizza un documento con il metodo dei sei cappelli
 """
 from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
-from domain.exceptions import UnsupportedHatException
 from application.ports.output import ILLMProvider, IPromptBuilder, IResponseParser
 
 
