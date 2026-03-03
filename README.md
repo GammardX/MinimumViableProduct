@@ -37,3 +37,11 @@ docker compose up --build
 
 # Per spegnere
 Nel terminale premere Ctrl+C oppure "docker compose down"
+
+
+## Setup Frontend Unit Tests (no docker needed)
+
+Install dependencies:
+
+```bash
+npm install

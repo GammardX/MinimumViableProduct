@@ -6,10 +6,16 @@ export default defineConfig({
   base: '/MinimumViableProduct/',
   server: {
     watch: {
-      usePolling: true, 
+      usePolling: true,
     },
     host: true,
     strictPort: true,
     port: 5173,
-  }
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    clearMocks: true,
+  },
 })
