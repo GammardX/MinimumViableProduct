@@ -198,7 +198,7 @@ describe('App', () => {
     expect(screen.getByText('ID Nota: note-1')).toBeInTheDocument();
   });
 
-  it('renders empty state and triggers handlers', async () => {
+  it('renders empty state and triggers create note handler', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -206,7 +206,6 @@ describe('App', () => {
       ...baseline.notesManager,
       activeNote: undefined,
       handleCreateNote: baseline.handlers.handleCreateNote,
-      handleImportNote: baseline.handlers.handleImportNote,
     });
 
     render(<App />);
@@ -214,10 +213,75 @@ describe('App', () => {
     expect(screen.getByText('Inizia a scrivere')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: '+ Nuova Nota' }));
-    await user.click(screen.getByRole('button', { name: '📂 Importa File' }));
 
     expect(baseline.handlers.handleCreateNote).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders empty state and triggers import note handler', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseNotesManager.mockReturnValueOnce({
+      ...baseline.notesManager,
+      activeNote: undefined,
+      handleImportNote: baseline.handlers.handleImportNote,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText('Inizia a scrivere')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '📂 Importa File' }));
+
     expect(baseline.handlers.handleImportNote).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows delete confirmation dialog with correct message', () => {
+    const baseline = createBaseline();
+
+    mockedUseNotesManager.mockReturnValueOnce({
+      ...baseline.notesManager,
+      deleteDialogOpen: true,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText('Conferma eliminazione')).toBeInTheDocument();
+    expect(screen.getByText(/Sei sicuro di voler eliminare questa nota/)).toBeInTheDocument();
+  });
+
+  it('calls cancelDelete when annulla button is clicked', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseNotesManager.mockReturnValueOnce({
+      ...baseline.notesManager,
+      deleteDialogOpen: true,
+      cancelDelete: baseline.notesManager.cancelDelete,
+    });
+
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Annulla' }));
+
+    expect(baseline.notesManager.cancelDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls confirmDelete when elimina button is clicked', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseNotesManager.mockReturnValueOnce({
+      ...baseline.notesManager,
+      deleteDialogOpen: true,
+      confirmDelete: baseline.notesManager.confirmDelete,
+    });
+
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Elimina' }));
+
+    expect(baseline.notesManager.confirmDelete).toHaveBeenCalledTimes(1);
   });
 
   it('calls wakeUpServer on mount and interval', () => {
@@ -275,5 +339,83 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Snackbar Close' }));
 
     expect(screen.getByText('TopBar: Nota test')).toBeInTheDocument();
+  });
+
+  it('calls handleCopyInternalLink when clicking note ID', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseNavigation.mockReturnValueOnce({
+      ...baseline.navigation,
+      handleCopyInternalLink: baseline.navigation.handleCopyInternalLink,
+    });
+
+    render(<App />);
+
+    await user.click(screen.getByText('ID Nota: note-1'));
+
+    expect(baseline.navigation.handleCopyInternalLink).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls handleResizerClick when resizer is clicked', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseSidebarResize.mockReturnValueOnce({
+      ...baseline.sidebarResize,
+      handleResizerClick: baseline.sidebarResize.handleResizerClick,
+    });
+
+    render(<App />);
+
+    const resizer = document.querySelector('.resizer');
+    await user.click(resizer!);
+
+    expect(baseline.sidebarResize.handleResizerClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls startResizing when resizer is dragged', async () => {
+    const user = userEvent.setup();
+    const baseline = createBaseline();
+
+    mockedUseSidebarResize.mockReturnValueOnce({
+      ...baseline.sidebarResize,
+      startResizing: baseline.sidebarResize.startResizing,
+    });
+
+    render(<App />);
+
+    const resizer = document.querySelector('.resizer');
+    await user.pointer({ keys: '[MouseLeft>]', target: resizer! });
+
+    expect(baseline.sidebarResize.startResizing).toHaveBeenCalled();
+  });
+
+  it('updates editor when active note changes', () => {
+    const baseline = createBaseline();
+    const anotherNote = {
+      id: 'note-2',
+      title: 'Altra nota',
+      content: 'Nuovo contenuto',
+      createdAt: 2,
+      aiHistory: [],
+    };
+
+    mockedUseNotesManager.mockReturnValueOnce({
+      ...baseline.notesManager,
+      activeNote: anotherNote,
+    });
+
+    render(<App />);
+
+    expect(screen.getByText('Editor: Nuovo contenuto')).toBeInTheDocument();
+    expect(screen.getByText('TopBar: Altra nota')).toBeInTheDocument();
+  });
+
+  it('does not render snackbar when closed', () => {
+    render(<App />);
+
+    const snackbar = screen.getByTestId('snackbar');
+    expect(snackbar).toHaveAttribute('data-open', 'false');
   });
 });
