@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { useSidebarResize } from './useSidebarResize';
 
 describe('useSidebarResize', () => {
-  it('returns default state', () => {
+  it('restituisce lo stato predefinito', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     expect(result.current.sidebarWidth).toBe(250);
@@ -11,7 +11,7 @@ describe('useSidebarResize', () => {
     expect(result.current.sidebarRef.current).toBeNull();
   });
 
-  it('resizes to collapsed width when cursor is <= 100', () => {
+  it('ridimensiona la larghezza compressa quando il cursore è <= 100', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {
@@ -25,7 +25,7 @@ describe('useSidebarResize', () => {
     expect(result.current.isResizing).toBe(true);
   });
 
-  it('resizes within allowed range and ignores >= 600', () => {
+  it('ridimensiona all\'interno dell\'intervallo consentito e ignora >= 600', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {
@@ -42,7 +42,7 @@ describe('useSidebarResize', () => {
     expect(result.current.sidebarWidth).toBe(320);
   });
 
-  it('stops resizing on mouseup', () => {
+  it('arresta il ridimensionamento al rilascio del mouse', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {
@@ -53,7 +53,7 @@ describe('useSidebarResize', () => {
     expect(result.current.isResizing).toBe(false);
   });
 
-  it('restores width on resizer click when previously collapsed', () => {
+  it('ripristina la larghezza al clic del ridimensionatore quando precedentemente compresso', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {
@@ -74,7 +74,7 @@ describe('useSidebarResize', () => {
     expect(result.current.sidebarWidth).toBe(250);
   });
   
-  it('ignores mousemove when not resizing', () => {
+  it('ignora il movimento del mouse quando non si ridimensiona', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {
@@ -84,7 +84,7 @@ describe('useSidebarResize', () => {
     expect(result.current.sidebarWidth).toBe(250);
   });
 
-  it('does not restore width if collapse precondition is not met', () => {
+  it('non ripristina la larghezza se la precondizione di compressione non è soddisfatta', () => {
     const { result } = renderHook(() => useSidebarResize());
 
     act(() => {

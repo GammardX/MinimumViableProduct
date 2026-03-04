@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import MarkdownEditor from './MarkdownEditor';
 
@@ -45,7 +45,7 @@ describe('MarkdownEditor', () => {
     };
   });
 
-  it('propagates changes and instance ready callback', () => {
+  it('propaga le modifiche e il callback pronto dell\'istanza', () => {
     const onChange = vi.fn();
     const onInstanceReady = vi.fn();
 
@@ -60,7 +60,7 @@ describe('MarkdownEditor', () => {
     expect(shared.currentInstance.codemirror.scrollTo).toHaveBeenCalledWith(0, 0);
   });
 
-  it('does not toggle side-by-side when already active', () => {
+  it('non attiva/disattiva la modalità affiancata quando è già attiva', () => {
     shared.currentInstance.isSideBySideActive = vi.fn(() => true);
     render(<MarkdownEditor initialValue='x' />);
 
@@ -68,7 +68,7 @@ describe('MarkdownEditor', () => {
     expect(shared.toggleSideBySide).not.toHaveBeenCalled();
   });
 
-  it('runs custom select-chapter toolbar action in heading and no-heading cases', () => {
+  it('esegue l\'azione della barra degli strumenti select-chapter personalizzata nei casi di intestazione e non', () => {
     render(<MarkdownEditor initialValue='x' />);
 
     const tool = shared.lastOptions.toolbar.find((t: any) => typeof t === 'object' && t.name === 'select-chapter');
@@ -99,7 +99,7 @@ describe('MarkdownEditor', () => {
     expect(focus).toHaveBeenCalled();
   });
 
-  it('handles preview click for note link', () => {
+  it('gestisce il clic di anteprima per il collegamento della nota', () => {
     const onNavigate = vi.fn();
     const { container } = render(<MarkdownEditor initialValue='x' onNavigate={onNavigate} />);
     const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
@@ -112,7 +112,7 @@ describe('MarkdownEditor', () => {
     expect(onNavigate).toHaveBeenCalledWith('note-1', 'sec');
   });
 
-  it('handles preview click for raw anchor link', () => {
+  it('gestisce il clic di anteprima per il collegamento di ancoraggio grezzo', () => {
     const scrollIntoView = vi.fn();
     vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
       if (id === 'raw-anchor') return { scrollIntoView } as any;
@@ -130,7 +130,7 @@ describe('MarkdownEditor', () => {
     expect(scrollIntoView).toHaveBeenCalled();
   });
 
-  it('handles preview click for normalized anchor link', () => {
+  it('gestisce il clic di anteprima per il collegamento di ancoraggio normalizzato', () => {
     const scrollIntoView = vi.fn();
     vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
       if (id === 'anchorid') return { scrollIntoView } as any;
@@ -148,7 +148,7 @@ describe('MarkdownEditor', () => {
     expect(scrollIntoView).toHaveBeenCalled();
   });
 
-  it('handles preview click for missing anchor without crashing', () => {
+  it('gestisce il clic di anteprima per l\'ancoraggio mancante senza arresto', () => {
     vi.spyOn(document, 'getElementById').mockReturnValue(null);
 
     const { container } = render(<MarkdownEditor initialValue='x' />);
@@ -161,7 +161,7 @@ describe('MarkdownEditor', () => {
     expect(() => fireEvent.click(missingAnchor)).not.toThrow();
   });
 
-  it('handles preview click on link without href', () => {
+  it('gestisce il clic di anteprima sul collegamento senza href', () => {
     const { container } = render(<MarkdownEditor initialValue='x' />);
     const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
@@ -171,7 +171,7 @@ describe('MarkdownEditor', () => {
     expect(() => fireEvent.click(noHref)).not.toThrow();
   });
 
-  it('handles preview click on non-link element', () => {
+  it('gestisce il clic di anteprima su un elemento non collegamento', () => {
     const { container } = render(<MarkdownEditor initialValue='x' />);
     const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
@@ -181,7 +181,7 @@ describe('MarkdownEditor', () => {
     expect(() => fireEvent.click(plain)).not.toThrow();
   });
 
-  it('does not call onNavigate when not provided', () => {
+  it('non chiama onNavigate quando non viene fornito', () => {
     const { container } = render(<MarkdownEditor initialValue='x' />);
     const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
     const noteLink = document.createElement('a');

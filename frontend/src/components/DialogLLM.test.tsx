@@ -20,7 +20,7 @@ describe('DialogLLM', () => {
     vi.restoreAllMocks();
   });
 
-  it('shows loading state and cancel button', () => {
+  it('mostra lo stato di caricamento e il pulsante Annulla', () => {
     const onCancel = vi.fn();
     render(<DialogLLM text='' open loading onClose={vi.fn()} onCancel={onCancel} />);
 
@@ -28,12 +28,12 @@ describe('DialogLLM', () => {
     expect(screen.getByText('Annulla')).toBeInTheDocument();
   });
 
-  it('shows fallback text when result is empty', () => {
+  it('mostra il testo di fallback quando il risultato è vuoto', () => {
     render(<DialogLLM text='' open loading={false} onClose={vi.fn()} />);
     expect(screen.getByText('Nessun risultato')).toBeInTheDocument();
   });
 
-  it('calls onReplace when Sostituisci Testo button is clicked', async () => {
+  it('chiama onReplace quando il pulsante Sostituisci Testo viene cliccato', async () => {
     const user = userEvent.setup();
     const onReplace = vi.fn();
 
@@ -55,7 +55,7 @@ describe('DialogLLM', () => {
     expect(onReplace).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onInsertBelow when Inserisci Sotto button is clicked', async () => {
+  it('chiama onInsertBelow quando il pulsante Inserisci Sotto viene cliccato', async () => {
     const user = userEvent.setup();
     const onInsertBelow = vi.fn();
 
@@ -77,7 +77,7 @@ describe('DialogLLM', () => {
     expect(onInsertBelow).toHaveBeenCalledTimes(1);
   });
 
-  it('shows create-note button for non-insert actions', async () => {
+  it('mostra il pulsante crea-nota per azioni non di inserimento', async () => {
     const user = userEvent.setup();
     const onCreateNewNote = vi.fn();
 
@@ -96,7 +96,7 @@ describe('DialogLLM', () => {
     expect(onCreateNewNote).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onCopySuccess when copy succeeds with callback', async () => {
+  it('chiama onCopySuccess quando la copia ha successo con callback', async () => {
     const user = userEvent.setup();
     const onCopySuccess = vi.fn();
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -114,7 +114,7 @@ describe('DialogLLM', () => {
     expect(onCopySuccess).toHaveBeenCalledTimes(1);
   });
 
-  it('copies text to clipboard when onCopySuccess is not provided', async () => {
+  it('copia il testo negli appunti quando onCopySuccess non è fornito', async () => {
     const user = userEvent.setup();
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
@@ -131,7 +131,7 @@ describe('DialogLLM', () => {
     expect(writeText).toHaveBeenCalledWith('copy me too');
   });
 
-  it('does not show copy button for invalid text', () => {
+  it('non mostra il pulsante copia per testo non valido', () => {
     render(
       <DialogLLM text="Generazione annullata dall'utente." open loading={false} onClose={vi.fn()} />
     );
@@ -139,7 +139,7 @@ describe('DialogLLM', () => {
     expect(screen.queryByRole('button', { name: 'Copia' })).not.toBeInTheDocument();
   });
 
-  it('logs copy errors when clipboard fails', async () => {
+  it('registra gli errori di copia quando gli appunti falliscono', async () => {
     const user = userEvent.setup();
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const writeText = vi.fn().mockRejectedValue(new Error('denied'));

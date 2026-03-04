@@ -2,110 +2,110 @@ import { describe, expect, it } from 'vitest';
 import { getPreviewStats } from './useWordsCounter';
 
 describe('getPreviewStats', () => {
-  it('returns zero stats for empty input', () => {
+  it('restituisce zero statistiche per input vuoto', () => {
     expect(getPreviewStats('')).toEqual({ words: 0, chars: 0 });
   });
 
-  it('removes heading markers (#) from text', () => {
+  it('rimuove i marcatori di titolo (#) dal testo', () => {
     const stats = getPreviewStats('# Heading');
     expect(stats.words).toBe(1);
     expect(stats.chars).toBe('Heading'.length);
   });
 
-  it('strips bold and italic formatting', () => {
+  it('rimuove la formattazione grassetto e corsivo', () => {
     const stats = getPreviewStats('**bold** _italic_');
     expect(stats.words).toBe(2);
     expect(stats.chars).toBe('bold italic'.length);
   });
 
-  it('removes strikethrough syntax', () => {
+  it('rimuove la sintassi barrato', () => {
     const stats = getPreviewStats('~~strike~~ text');
     expect(stats.words).toBe(2);
     expect(stats.chars).toBe('strike text'.length);
   });
 
-  it('ignores images completely', () => {
+  it('ignora completamente le immagini', () => {
     const stats = getPreviewStats('text ![alt](img.png) more');
     expect(stats.words).toBe(2);
     expect(stats.chars).toBe('text  more'.length); // two spaces where image was removed
   });
 
-  it('keeps link text but removes URL', () => {
+  it('mantiene il testo del collegamento ma rimuove l\'URL', () => {
     const stats = getPreviewStats('[click](http://x)');
     expect(stats.words).toBe(1);
     expect(stats.chars).toBe('click'.length);
   });
 
-  it('removes inline code spans and keeps the content', () => {
+  it('rimuove i frammenti di codice inline mantenendo il contenuto', () => {
     const stats = getPreviewStats('`code` snippet');
     expect(stats.words).toBe(2);
     expect(stats.chars).toBe('code snippet'.length);
   });
 
-  it('removes unordered list bullets', () => {
+  it('rimuove i punti elenco non ordinati', () => {
     const stats = getPreviewStats('- item\n* item2\n+ item3');
     expect(stats.words).toBe(3);
   });
 
-  it('removes ordered list numbers', () => {
+  it('rimuove i numeri degli elenchi ordinati', () => {
     const stats = getPreviewStats('1. one\n2. two');
     expect(stats.words).toBe(2);
   });
 
-  it('strips markdown and counts words correctly', () => {
+  it('rimuove markdown e conta correttamente le parole', () => {
     const markdown = '# Title\n\n**bold** _italic_ [link](https://example.com)';
     const stats = getPreviewStats(markdown);
 
     expect(stats.words).toBe(4);
   });
 
-  it('strips markdown and counts characters correctly', () => {
+  it('rimuove markdown e conta correttamente i caratteri', () => {
     const markdown = '# Title\n\n**bold** _italic_ [link](https://example.com)';
     const stats = getPreviewStats(markdown);
 
     expect(stats.chars).toBe('Title\n\nbold italic link'.length);
   });
 
-  it('handles lists correctly', () => {
+  it('gestisce correttamente gli elenchi', () => {
     const markdown = '- one\n- two';
     const stats = getPreviewStats(markdown);
 
     expect(stats.words).toBe(2);
   });
 
-  it('keeps code text but removes images', () => {
+  it('mantiene il testo del codice ma rimuove le immagini', () => {
     const markdown = '`code` ![img](x.png)';
     const stats = getPreviewStats(markdown);
 
     expect(stats.words).toBe(1);
   });
 
-  it('preserves unmatched formatting characters', () => {
+  it('preserva i caratteri di formattazione non abbinati', () => {
     const stats = getPreviewStats('****__~~');
     // **: becomes empty, __: becomes empty, ~~ remains as one "word"
     expect(stats.words).toBe(1);
     expect(stats.chars).toBe(2); // just ~~
   });
 
-  it('handles nested formatting markers correctly', () => {
+  it('gestisce correttamente i marcatori di formattazione annidati', () => {
     const stats = getPreviewStats('**bold _nested_**');
     expect(stats.words).toBe(2);
     expect(stats.chars).toBe('bold nested'.length);
   });
 
-  it('counts chars including whitespace, words from trimmed split', () => {
+  it('conta i caratteri inclusi gli spazi bianchi, le parole dal split trimato', () => {
     const stats = getPreviewStats('   text   ');
     expect(stats.words).toBe(1);
     expect(stats.chars).toBe(10);
   });
 
-  it('returns zero words for whitespace-only text', () => {
+  it('restituisce zero parole per il testo solo spazi bianchi', () => {
     const stats = getPreviewStats('\n\n');
     expect(stats.words).toBe(0);
     expect(stats.chars).toBe(2);
   });
 
-  it('handles very long input without breaking', () => {
+  it('gestisce input molto lungo senza rompere', () => {
     const long = '#'.repeat(1000) + ' word';
     const stats = getPreviewStats(long);
     // The heading regex strips the leading hashes and space, leaving only 'word'

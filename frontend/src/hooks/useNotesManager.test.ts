@@ -34,7 +34,7 @@ describe('useNotesManager', () => {
     vi.restoreAllMocks();
   });
 
-  it('loads saved notes and sets active note', async () => {
+  it('carica le note salvate e imposta la nota attiva', async () => {
     const saved = [
       { id: 'a1', title: 'A', content: 'A content', createdAt: 1 },
       { id: 'a2', title: 'B', content: 'B content', createdAt: 2 },
@@ -49,7 +49,7 @@ describe('useNotesManager', () => {
     expect(result.current.activeNoteId).toBe('a1');
   });
 
-  it('initializes welcome note when storage is empty', async () => {
+  it('inizializza la nota di benvenuto quando l\'archiviazione è vuota', async () => {
     mockedGet.mockResolvedValue(undefined);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -61,7 +61,7 @@ describe('useNotesManager', () => {
     expect(mockedSet).toHaveBeenCalledWith(DB_KEY, expect.any(Array));
   });
 
-  it('shows snackbar when load fails', async () => {
+  it('mostra snackbar quando il caricamento fallisce', async () => {
     mockedGet.mockRejectedValue(new Error('db down'));
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -75,7 +75,7 @@ describe('useNotesManager', () => {
     });
   });
 
-  it('logs an error to console on load failure', async () => {
+  it('registra un errore sulla console quando il caricamento fallisce', async () => {
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockedGet.mockRejectedValue(new Error('db down'));
 
@@ -85,7 +85,7 @@ describe('useNotesManager', () => {
     expect(errSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('shows snackbar on autosave failure', async () => {
+  it('mostra snackbar in caso di fallimento del salvataggio automatico', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 't', createdAt: 1 }]);
     mockedSet.mockRejectedValueOnce(new Error('save failed'));
 
@@ -100,7 +100,7 @@ describe('useNotesManager', () => {
     });
   });
 
-  it('creates a new note and makes it active', async () => {
+  it('crea una nuova nota e la rende attiva', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -114,7 +114,7 @@ describe('useNotesManager', () => {
     expect(result.current.activeNoteId).toBe('1000');
   });
 
-  it('updates note content correctly', async () => {
+  it('aggiorna correttamente il contenuto della nota', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -129,7 +129,7 @@ describe('useNotesManager', () => {
     expect(updated?.content).toBe('new text');
   });
 
-  it('renames a note after creation', async () => {
+  it('rinomina una nota dopo la creazione', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -144,7 +144,7 @@ describe('useNotesManager', () => {
     expect(created?.title).toBe('Renamed');
   });
 
-  it('opens delete dialog and prevents propagation', async () => {
+  it('apre la finestra di dialogo di eliminazione e impedisce la propagazione', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -159,7 +159,7 @@ describe('useNotesManager', () => {
     expect(result.current.deleteDialogOpen).toBe(true);
   });
 
-  it('cancels delete dialog when requested', async () => {
+  it('annulla la finestra di dialogo di eliminazione quando richiesto', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -176,7 +176,7 @@ describe('useNotesManager', () => {
     expect(result.current.deleteDialogOpen).toBe(false);
   });
 
-  it('confirmDelete returns early when no note is selected', async () => {
+  it('confirmDelete ritorna anticipatamente quando nessuna nota è selezionata', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
     const { result } = renderHook(() => useNotesManager(setSnackbar));
     await waitFor(() => expect(result.current.isLoaded).toBe(true));
@@ -188,7 +188,7 @@ describe('useNotesManager', () => {
     expect(setSnackbar).not.toHaveBeenCalled();
   });
 
-  it('deletes note successfully and updates active note', async () => {
+  it('elimina la nota con successo e aggiorna la nota attiva', async () => {
     mockedGet.mockResolvedValue([
       { id: 'x', title: 'X', content: 'x', createdAt: 1 },
       { id: 'y', title: 'Y', content: 'y', createdAt: 2 },
@@ -214,7 +214,7 @@ describe('useNotesManager', () => {
     });
   });
 
-  it('handles delete errors', async () => {
+  it('gestisce gli errori di eliminazione', async () => {
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
 
@@ -240,7 +240,7 @@ describe('useNotesManager', () => {
     expect(errSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('imports notes when file service returns data', async () => {
+  it('importa le note quando il servizio file restituisce dati', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
     mockedFileService.importFile.mockResolvedValue({
       title: 'Imported',
@@ -258,7 +258,7 @@ describe('useNotesManager', () => {
     expect(result.current.activeNoteId).toBe('1000');
   });
 
-  it('does nothing on import when service returns null', async () => {
+  it('non fa nulla all\'importazione quando il servizio restituisce null', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
     mockedFileService.importFile.mockResolvedValue(null);
 
@@ -272,7 +272,7 @@ describe('useNotesManager', () => {
     expect(result.current.notes).toHaveLength(1);
   });
 
-  it('exports existing note and skips unknown id', async () => {
+  it('esporta la nota esistente e salta l\'ID sconosciuto', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -287,7 +287,7 @@ describe('useNotesManager', () => {
     expect(mockedFileService.exportFile).toHaveBeenCalledWith('X', 'x');
   });
 
-  it('clears active id when deleting the last active note', async () => {
+  it('cancella l\'ID attivo quando si elimina l\'ultima nota attiva', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -305,7 +305,7 @@ describe('useNotesManager', () => {
     expect(result.current.activeNoteId).toBe('');
   });
 
-  it('keeps active id when deleting a non-active note', async () => {
+  it('mantiene l\'ID attivo quando si elimina una nota non attiva', async () => {
     mockedGet.mockResolvedValue([
       { id: 'x', title: 'X', content: 'x', createdAt: 1 },
       { id: 'y', title: 'Y', content: 'y', createdAt: 2 },

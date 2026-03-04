@@ -177,7 +177,7 @@ describe('App', () => {
   });
 
   // UNIT TESTS
-  it('shows loading screen when notes are not loaded', () => {
+  it('mostra la schermata di caricamento quando le note non vengono caricate', () => {
     const baseline = createBaseline();
     mockedUseNotesManager.mockReturnValueOnce({
       ...baseline.notesManager,
@@ -189,7 +189,7 @@ describe('App', () => {
     expect(screen.getByText('Caricamento note...')).toBeInTheDocument();
   });
 
-  it('renders active note content and status info', () => {
+  it('renderizza il contenuto della nota attiva e le informazioni di stato', () => {
     render(<App />);
 
     expect(screen.getByText('TopBar: Nota test')).toBeInTheDocument();
@@ -198,7 +198,7 @@ describe('App', () => {
     expect(screen.getByText('ID Nota: note-1')).toBeInTheDocument();
   });
 
-  it('renders empty state and triggers create note handler', async () => {
+  it('renderizza lo stato vuoto e attiva il handler di creazione della nota', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -217,7 +217,7 @@ describe('App', () => {
     expect(baseline.handlers.handleCreateNote).toHaveBeenCalledTimes(1);
   });
 
-  it('renders empty state and triggers import note handler', async () => {
+  it('renderizza lo stato vuoto e attiva il handler di importazione della nota', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -236,7 +236,7 @@ describe('App', () => {
     expect(baseline.handlers.handleImportNote).toHaveBeenCalledTimes(1);
   });
 
-  it('shows delete confirmation dialog with correct message', () => {
+  it('mostra la finestra di dialogo di conferma dell\'eliminazione con il messaggio corretto', () => {
     const baseline = createBaseline();
 
     mockedUseNotesManager.mockReturnValueOnce({
@@ -250,7 +250,7 @@ describe('App', () => {
     expect(screen.getByText(/Sei sicuro di voler eliminare questa nota/)).toBeInTheDocument();
   });
 
-  it('calls cancelDelete when annulla button is clicked', async () => {
+  it('chiama cancelDelete quando il pulsante Annulla viene cliccato', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -267,7 +267,7 @@ describe('App', () => {
     expect(baseline.notesManager.cancelDelete).toHaveBeenCalledTimes(1);
   });
 
-  it('calls confirmDelete when elimina button is clicked', async () => {
+  it('chiama confirmDelete quando il pulsante Elimina viene cliccato', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -284,7 +284,7 @@ describe('App', () => {
     expect(baseline.notesManager.confirmDelete).toHaveBeenCalledTimes(1);
   });
 
-  it('calls wakeUpServer on mount and interval', () => {
+  it('chiama wakeUpServer al montaggio e all\'intervallo', () => {
     vi.useFakeTimers();
 
     render(<App />);
@@ -295,7 +295,7 @@ describe('App', () => {
     expect(mockedWakeUpServer).toHaveBeenCalledTimes(2);
   });
 
-  it('adds active class to resizer when sidebar is collapsed', () => {
+  it('aggiunge la classe attiva al ridimensionatore quando la barra laterale è compressa', () => {
     const baseline = createBaseline();
     mockedUseSidebarResize.mockReturnValueOnce({
       ...baseline.sidebarResize,
@@ -308,7 +308,7 @@ describe('App', () => {
     expect(resizer).toHaveClass('active');
   });
 
-  it('adds is-resizing class when sidebar drag is active', () => {
+  it('aggiunge la classe is-resizing quando il trascinamento della barra laterale è attivo', () => {
     const baseline = createBaseline();
     mockedUseSidebarResize.mockReturnValueOnce({
       ...baseline.sidebarResize,
@@ -321,7 +321,7 @@ describe('App', () => {
     expect(appContainer).toHaveClass('is-resizing');
   });
 
-  it('ignores snackbar clickaway close reason', async () => {
+  it('ignora la ragione di chiusura del clickaway della snackbar', async () => {
     const user = userEvent.setup();
 
     render(<App />);
@@ -331,7 +331,7 @@ describe('App', () => {
     expect(screen.getByText('TopBar: Nota test')).toBeInTheDocument();
   });
 
-  it('handles snackbar normal close', async () => {
+  it('gestisce la chiusura normale della snackbar', async () => {
     const user = userEvent.setup();
 
     render(<App />);
@@ -341,7 +341,7 @@ describe('App', () => {
     expect(screen.getByText('TopBar: Nota test')).toBeInTheDocument();
   });
 
-  it('calls handleCopyInternalLink when clicking note ID', async () => {
+  it('chiama handleCopyInternalLink quando si clicca l\'ID della nota', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -357,7 +357,7 @@ describe('App', () => {
     expect(baseline.navigation.handleCopyInternalLink).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handleResizerClick when resizer is clicked', async () => {
+  it('chiama handleResizerClick quando il ridimensionatore viene cliccato', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -374,7 +374,7 @@ describe('App', () => {
     expect(baseline.sidebarResize.handleResizerClick).toHaveBeenCalledTimes(1);
   });
 
-  it('calls startResizing when resizer is dragged', async () => {
+  it('chiama startResizing quando il ridimensionatore viene trascinato', async () => {
     const user = userEvent.setup();
     const baseline = createBaseline();
 
@@ -391,7 +391,7 @@ describe('App', () => {
     expect(baseline.sidebarResize.startResizing).toHaveBeenCalled();
   });
 
-  it('updates editor when active note changes', () => {
+  it('aggiorna l\'editor quando la nota attiva cambia', () => {
     const baseline = createBaseline();
     const anotherNote = {
       id: 'note-2',
@@ -412,7 +412,7 @@ describe('App', () => {
     expect(screen.getByText('TopBar: Altra nota')).toBeInTheDocument();
   });
 
-  it('does not render snackbar when closed', () => {
+  it('non renderizza la snackbar quando è chiusa', () => {
     render(<App />);
 
     const snackbar = screen.getByTestId('snackbar');

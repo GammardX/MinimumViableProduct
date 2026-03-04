@@ -88,7 +88,7 @@ describe('TopBar', () => {
     llm.getSelectionText.mockReturnValue('this is a long selected ai generated paragraph example');
   });
 
-  it('opens generate dialog with AI warning when similarity is high', async () => {
+  it('apre la finestra di generazione con avviso IA quando la similarità è alta', async () => {
     const user = userEvent.setup();
     mockedSimilarity.mockImplementationOnce(() => 80).mockImplementation(() => 10);
 
@@ -98,7 +98,7 @@ describe('TopBar', () => {
     expect(screen.getByText(/stai rigenerando un testo creato/i)).toBeInTheDocument();
   });
 
-  it('generate submits prompt and handles success with rewritten text', async () => {
+  it('genera invia il prompt e gestisce il successo con testo riscritto', async () => {
     const user = userEvent.setup();
     mockedSimilarity.mockImplementationOnce(() => 80).mockImplementation(() => 10);
     mockedGenerateText.mockResolvedValue(okResponse as any);
@@ -114,7 +114,7 @@ describe('TopBar', () => {
     expect(llm.setDialogResult).toHaveBeenCalledWith('rewritten', 'best prompt');
   });
 
-  it('generate uses fallback text when rewritten_text is null', async () => {
+  it('genera usa il testo di fallback quando rewritten_text è null', async () => {
     const user = userEvent.setup();
     llm.getSelectionText.mockReturnValue('short');
     mockedGenerateText.mockResolvedValue({
@@ -135,7 +135,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('generate handles non-abort errors', async () => {
+  it('genera gestisce gli errori non di interruzione', async () => {
     const user = userEvent.setup();
     llm.getSelectionText.mockReturnValue('short');
     mockedGenerateText.mockRejectedValue(new Error('boom'));
@@ -152,7 +152,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('generate keeps default word count when numeric input is NaN and disables empty prompt submit', async () => {
+  it('genera mantiene il conteggio delle parole predefinito quando l\'input numerico è NaN e disabilita l\'invio del prompt vuoto', async () => {
     const user = userEvent.setup();
     llm.getSelectionText.mockReturnValue('short');
     mockedGenerateText.mockResolvedValue(okResponse as any);
@@ -176,7 +176,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('summary chooses insert mode when there is selection', async () => {
+  it('il riassunto sceglie la modalità di inserimento quando c\'è una selezione', async () => {
     const user = userEvent.setup();
     llm.hasSelection.mockReturnValue(true);
     mockedSummarizeText.mockResolvedValue(okResponse as any);
@@ -188,7 +188,7 @@ describe('TopBar', () => {
     await waitFor(() => expect(llm.openLoadingDialog).toHaveBeenCalledWith('insert'));
   });
 
-  it('summary uses slider value when applying', async () => {
+  it('il riassunto utilizza il valore del cursore quando si applica', async () => {
     const user = userEvent.setup();
     mockedSummarizeText.mockResolvedValue(okResponse as any);
 
@@ -202,7 +202,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('summary handles INVALID_INPUT response', async () => {
+  it('il riassunto gestisce la risposta INVALID_INPUT', async () => {
     const user = userEvent.setup();
     mockedSummarizeText.mockResolvedValue({
       outcome: { status: 'INVALID_INPUT', code: 'I1' },
@@ -218,7 +218,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('summary handles unknown server status', async () => {
+  it('il riassunto gestisce lo stato del server sconosciuto', async () => {
     const user = userEvent.setup();
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockedSummarizeText.mockResolvedValue({
@@ -236,7 +236,7 @@ describe('TopBar', () => {
     expect(errorSpy).toHaveBeenCalled();
   });
 
-  it('summary handles non-abort errors', async () => {
+  it('il riassunto gestisce gli errori non di interruzione', async () => {
     const user = userEvent.setup();
     mockedSummarizeText.mockRejectedValue(new Error('sum fail'));
 
@@ -249,28 +249,28 @@ describe('TopBar', () => {
     });
   });
 
-  it('improve handles success response', async () => {
+  it('il miglioramento gestisce la risposta di successo', async () => {
     const user = userEvent.setup();
     mockedImproveWriting.mockResolvedValue(okResponse as any);
 
     render(<TopBar title='Doc' llm={llm} />);
     await user.click(screen.getByRole('button', { name: /Migliora/i }));
 
-    const input = screen.getByLabelText(/pi� formale|più formale|textfield/i);
+    const input = screen.getByLabelText(/pi� formale|più formale|textfield/i);
     await user.type(input, 'better');
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
     await waitFor(() => expect(llm.setDialogResult).toHaveBeenCalledWith('rewritten', undefined));
   });
 
-  it('improve handles non-abort errors', async () => {
+  it('il miglioramento gestisce gli errori non di interruzione', async () => {
     const user = userEvent.setup();
     mockedImproveWriting.mockRejectedValue(new Error('network'));
 
     render(<TopBar title='Doc' llm={llm} />);
     await user.click(screen.getByRole('button', { name: /Migliora/i }));
 
-    const input = screen.getByLabelText(/pi� formale|più formale|textfield/i);
+    const input = screen.getByLabelText(/pi� formale|più formale|textfield/i);
     await user.type(input, 'formal');
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
@@ -279,7 +279,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('translate handles success response', async () => {
+  it('la traduzione gestisce la risposta di successo', async () => {
     const user = userEvent.setup();
     mockedTranslate.mockResolvedValue(okResponse as any);
 
@@ -293,7 +293,7 @@ describe('TopBar', () => {
     await waitFor(() => expect(llm.setDialogResult).toHaveBeenCalledWith('rewritten', undefined));
   });
 
-  it('translate ignores AbortError', async () => {
+  it('la traduzione ignora AbortError', async () => {
     const user = userEvent.setup();
     mockedTranslate.mockRejectedValue({ name: 'AbortError' });
 
@@ -308,7 +308,7 @@ describe('TopBar', () => {
     expect(llm.setDialogResult).not.toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
   });
 
-  it('translate handles non-abort errors', async () => {
+  it('la traduzione gestisce gli errori non di interruzione', async () => {
     const user = userEvent.setup();
     mockedTranslate.mockRejectedValue(new Error('translate net'));
 
@@ -324,7 +324,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('six-hats handles refusal', async () => {
+  it('i sei cappelli gestiscono il rifiuto', async () => {
     const user = userEvent.setup();
     mockedApplySixHats.mockResolvedValue({
       outcome: { status: 'refusal', code: 'R1', violation_category: 'Safe' },
@@ -340,7 +340,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('six-hats handles non-abort errors', async () => {
+  it('i sei cappelli gestiscono gli errori non di interruzione', async () => {
     const user = userEvent.setup();
     mockedApplySixHats.mockRejectedValue(new Error('net'));
 
@@ -353,7 +353,7 @@ describe('TopBar', () => {
     });
   });
 
-  it('analysis menu closes after selecting an hat', async () => {
+  it('il menu di analisi si chiude dopo aver selezionato un cappello', async () => {
     const user = userEvent.setup();
     mockedApplySixHats.mockResolvedValue(okResponse as any);
 
@@ -366,14 +366,14 @@ describe('TopBar', () => {
     });
   });
 
-  it('cancel buttons close summary, improve and translate dialogs', async () => {
+  it('i pulsanti annulla chiudono le finestre di riassunto, miglioramento e traduzione', async () => {
     const user = userEvent.setup();
     render(<TopBar title='Doc' llm={llm} />);
 
     await user.click(screen.getByRole('button', { name: /Riassumi/i }));
-    expect(screen.getByText(/Intensit� del riassunto|Intensità del riassunto/i)).toBeInTheDocument();
+    expect(screen.getByText(/Intensit� del riassunto|Intensità del riassunto/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /^Annulla$/i }));
-    expect(screen.queryByText(/Intensit� del riassunto|Intensità del riassunto/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Intensit� del riassunto|Intensità del riassunto/i)).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Migliora/i }));
     expect(screen.getByText(/criterio di riscrittura/i)).toBeInTheDocument();

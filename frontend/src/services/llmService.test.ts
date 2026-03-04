@@ -23,7 +23,7 @@ describe('llmService', () => {
     vi.restoreAllMocks();
   });
 
-  it('summarizeText sends expected payload and returns parsed response', async () => {
+  it('summarizeText invia il payload previsto e restituisce la risposta analizzata', async () => {
     const mockResponse: LLMResponse = {
       outcome: { status: 'success', code: 'OK' },
       data: { rewritten_text: 'summary' },
@@ -49,7 +49,7 @@ describe('llmService', () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it('improveWriting uses default criterion', async () => {
+  it('improveWriting utilizza il criterio predefinito', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({
@@ -71,7 +71,7 @@ describe('llmService', () => {
     );
   });
 
-  it('translate sends target language', async () => {
+  it('translate invia la lingua di destinazione', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({
@@ -90,7 +90,7 @@ describe('llmService', () => {
     );
   });
 
-  it('applySixHats sends selected hat', async () => {
+  it('applySixHats invia il cappello selezionato', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({
@@ -109,7 +109,7 @@ describe('llmService', () => {
     );
   });
 
-  it('generateText uses defaults for context and word count', async () => {
+  it('generateText utilizza i valori predefiniti per il contesto e il conteggio delle parole', async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({
@@ -132,7 +132,7 @@ describe('llmService', () => {
     );
   });
 
-  it('throws backend error when response is not ok', async () => {
+  it('genera un errore di backend quando la risposta non è ok', async () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 500,
@@ -144,16 +144,16 @@ describe('llmService', () => {
     );
   });
 
-  it('checkTextSimilarity returns 0 for missing inputs and computes overlap', () => {
+  it('checkTextSimilarity restituisce 0 per input mancanti e calcola la sovrapposizione', () => {
     expect(checkTextSimilarity('', 'anything')).toBe(0);
     expect(checkTextSimilarity('one two three', 'two four five')).toBeCloseTo(33.333, 2);
   });
 
-  it('checkTextSimilarity returns 0 for non-word inputs', () => {
+  it('checkTextSimilarity restituisce 0 per input non di parole', () => {
     expect(checkTextSimilarity('!!!', '***')).toBe(0);
   });
 
-  it('wakeUpServer triggers health ping', () => {
+  it('wakeUpServer attiva il ping di salute', () => {
     fetchMock.mockResolvedValue({ ok: true });
 
     wakeUpServer();
@@ -163,7 +163,7 @@ describe('llmService', () => {
     });
   });
 
-  it('wakeUpServer handles fetch failure without throwing', async () => {
+  it('wakeUpServer gestisce il fallimento del recupero senza lanciare', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     fetchMock.mockRejectedValue(new Error('offline'));
 

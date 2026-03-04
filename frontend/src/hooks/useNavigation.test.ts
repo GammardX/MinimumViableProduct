@@ -20,7 +20,7 @@ describe('useNavigation', () => {
     vi.useRealTimers();
   });
 
-  it('navigates by note id', () => {
+  it('naviga per ID della nota', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -32,7 +32,7 @@ describe('useNavigation', () => {
     expect(setActiveNoteId).toHaveBeenCalledWith('2');
   });
 
-  it('navigates by note title when url-encoded (case-insensitive)', () => {
+  it('naviga per titolo della nota quando è codificato URL (non sensibile a maiuscole/minuscole)', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -44,7 +44,7 @@ describe('useNavigation', () => {
     expect(setActiveNoteId).toHaveBeenCalledWith('2');
   });
 
-  it('navigates by unencoded note title with spaces (case-insensitive)', () => {
+  it('naviga per titolo della nota non codificato con spazi (non sensibile a maiuscole/minuscole)', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -56,7 +56,7 @@ describe('useNavigation', () => {
     expect(setActiveNoteId).toHaveBeenCalledWith('2');
   });
 
-  it('navigates by uppercase plain title', () => {
+  it('naviga per titolo in maiuscolo', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -68,7 +68,7 @@ describe('useNavigation', () => {
     expect(setActiveNoteId).toHaveBeenCalledWith('1');
   });
 
-  it('fails when plus sign is present (not treated as space)', () => {
+  it('fallisce quando è presente un segno più (non viene trattato come spazio)', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -84,7 +84,7 @@ describe('useNavigation', () => {
     });
   });
 
-  it('shows error when decoded target contains extra whitespace', () => {
+  it('mostra errore quando il target decodificato contiene spazi bianchi aggiuntivi', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -100,7 +100,7 @@ describe('useNavigation', () => {
     });
   });
 
-  it('scrolls to anchor when provided', () => {
+  it('scorre all\'ancoraggio quando fornito', () => {
     const scrollIntoView = vi.fn();
     const getByIdSpy = vi
       .spyOn(document, 'getElementById')
@@ -119,7 +119,7 @@ describe('useNavigation', () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
   });
 
-  it('shows error snackbar when target note is not found', () => {
+  it('mostra snackbar di errore quando la nota target non viene trovata', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -135,7 +135,7 @@ describe('useNavigation', () => {
     });
   });
 
-  it('copies internal link and shows success snackbar', async () => {
+  it('copia il collegamento interno e mostra snackbar di successo', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -159,7 +159,7 @@ describe('useNavigation', () => {
     });
   });
 
-  it('does nothing when copying link with no active note', () => {
+  it('non fa nulla quando si copia il collegamento senza nota attiva', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
@@ -177,7 +177,7 @@ describe('useNavigation', () => {
     expect(writeText).not.toHaveBeenCalled();
   });
 
-  it('logs clipboard errors', async () => {
+  it('registra gli errori degli appunti', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const writeText = vi.fn().mockRejectedValue(new Error('denied'));
     Object.defineProperty(navigator, 'clipboard', {

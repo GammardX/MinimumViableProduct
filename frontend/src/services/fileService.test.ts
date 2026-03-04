@@ -19,7 +19,7 @@ describe('fileService', () => {
     vi.useRealTimers();
   });
 
-  it('imports with modern file picker API', async () => {
+  it('importa con l\'API moderna del selezionatore di file', async () => {
     window.showOpenFilePicker = vi.fn().mockResolvedValue([
       {
         getFile: vi.fn().mockResolvedValue({
@@ -34,7 +34,7 @@ describe('fileService', () => {
     expect(result).toEqual({ title: 'note', content: 'hello from file' });
   });
 
-  it('returns null when modern import is aborted', async () => {
+  it('restituisce null quando l\'importazione moderna viene interrotta', async () => {
     window.showOpenFilePicker = vi
       .fn()
       .mockRejectedValue({ name: 'AbortError' });
@@ -44,7 +44,7 @@ describe('fileService', () => {
     expect(result).toBeNull();
   });
 
-  it('falls back to classic import flow when modern API fails', async () => {
+  it('torna al flusso di importazione classico quando l\'API moderna fallisce', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     window.showOpenFilePicker = vi
@@ -66,7 +66,7 @@ describe('fileService', () => {
     expect(result).toBeNull();
   });
 
-  it('imports selected file in classic flow', async () => {
+  it('importa il file selezionato nel flusso classico', async () => {
     const file = new File(['classic content'], 'classic-note.md', {
       type: 'text/markdown',
     });
@@ -88,7 +88,7 @@ describe('fileService', () => {
     expect(result).toEqual({ title: 'classic-note', content: 'classic content' });
   });
 
-  it('exports with modern save picker API', async () => {
+  it('esporta con l\'API moderna del selezionatore di salvataggio', async () => {
     const write = vi.fn().mockResolvedValue(undefined);
     const close = vi.fn().mockResolvedValue(undefined);
 
@@ -106,7 +106,7 @@ describe('fileService', () => {
     expect(createObjectURLSpy).not.toHaveBeenCalled();
   });
 
-  it('returns early when modern export is aborted', async () => {
+  it('restituisce in anticipo quando l\'esportazione moderna viene interrotta', async () => {
     window.showSaveFilePicker = vi
       .fn()
       .mockRejectedValue({ name: 'AbortError' });
@@ -118,7 +118,7 @@ describe('fileService', () => {
     expect(createObjectURLSpy).not.toHaveBeenCalled();
   });
 
-  it('uses classic export flow when modern save API is unavailable', async () => {
+  it('utilizza il flusso di esportazione classico quando l\'API moderna di salvataggio non è disponibile', async () => {
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {});
@@ -138,7 +138,7 @@ describe('fileService', () => {
     expect(revokeSpy).toHaveBeenCalledWith('blob:classic-url');
   });
   
-  it('falls back to classic export flow when modern save API fails', async () => {
+  it('torna al flusso di esportazione classico quando l\'API moderna di salvataggio fallisce', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')

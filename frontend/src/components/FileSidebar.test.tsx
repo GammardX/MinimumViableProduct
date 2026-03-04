@@ -11,7 +11,7 @@ const notes = [
 ];
 
 describe('FileSidebar', () => {
-  it('calls onCreate when create button is clicked', async () => {
+  it('chiama onCreate quando il pulsante crea viene cliccato', async () => {
     const user = userEvent.setup();
     const onCreate = vi.fn();
 
@@ -33,7 +33,7 @@ describe('FileSidebar', () => {
     expect(onCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onImport when import button is clicked', async () => {
+  it('chiama onImport quando il pulsante importa viene cliccato', async () => {
     const user = userEvent.setup();
     const onImport = vi.fn();
 
@@ -55,7 +55,7 @@ describe('FileSidebar', () => {
     expect(onImport).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onExport when export button is clicked', async () => {
+  it('chiama onExport quando il pulsante esporta viene cliccato', async () => {
     const user = userEvent.setup();
     const onExport = vi.fn();
 
@@ -77,7 +77,7 @@ describe('FileSidebar', () => {
     expect(onExport).toHaveBeenCalledWith('1');
   });
 
-  it('calls onSelect when note is clicked', async () => {
+  it('chiama onSelect quando la nota viene cliccata', async () => {
     const user = userEvent.setup();
     const onSelect = vi.fn();
 
@@ -99,7 +99,7 @@ describe('FileSidebar', () => {
     expect(onSelect).toHaveBeenCalledWith('2');
   });
 
-  it('calls onDelete when delete button is clicked', async () => {
+  it('chiama onDelete quando il pulsante elimina viene cliccato', async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
 
@@ -121,7 +121,7 @@ describe('FileSidebar', () => {
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
-  it('renames note when enter is pressed', async () => {
+  it('rinomina la nota quando viene premuto invio', async () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
 
@@ -146,7 +146,7 @@ describe('FileSidebar', () => {
     expect(onRename).toHaveBeenCalledWith('1', 'Renamed');
   });
 
-  it('cancels rename when escape is pressed', async () => {
+  it('annulla la rinomina quando viene premuto il tasto Esc', async () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
 
@@ -170,7 +170,7 @@ describe('FileSidebar', () => {
     expect(onRename).not.toHaveBeenCalled();
   });
 
-  it('saves rename on blur only for non-empty title', async () => {
+  it('salva la rinomina al blur solo per titoli non vuoti', async () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
 
@@ -194,7 +194,7 @@ describe('FileSidebar', () => {
     expect(onRename).not.toHaveBeenCalled();
   });
 
-  it('scrolls down when active note is below viewport', () => {
+  it('scorre verso il basso quando la nota attiva è sotto il viewport', () => {
     const scrollSpy = vi.fn();
     Object.defineProperty(HTMLElement.prototype, 'scrollBy', { configurable: true, value: scrollSpy });
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function mockRect(this: HTMLElement) {
@@ -219,7 +219,7 @@ describe('FileSidebar', () => {
     expect(scrollSpy).toHaveBeenCalledWith({ top: 60, behavior: 'smooth' });
   });
 
-  it('scrolls up when active note is above viewport', () => {
+  it('scorre verso l\'alto quando la nota attiva è sopra il viewport', () => {
     const scrollSpy = vi.fn();
     Object.defineProperty(HTMLElement.prototype, 'scrollBy', { configurable: true, value: scrollSpy });
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function mockRect(this: HTMLElement) {

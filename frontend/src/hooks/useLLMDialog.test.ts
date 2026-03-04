@@ -24,7 +24,7 @@ describe('useLLMDialog', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses editor selection when available', () => {
+  it('utilizza la selezione dell\'editor quando disponibile', () => {
     const editorInstance = {
       codemirror: {
         getSelection: vi.fn(() => ' selected '),
@@ -42,7 +42,7 @@ describe('useLLMDialog', () => {
     expect(result.current.llmBridge.hasSelection()).toBe(true);
   });
 
-  it('returns active note content when available', () => {
+  it('restituisce il contenuto della nota attiva quando disponibile', () => {
     const selectionSpy = vi
       .spyOn(window, 'getSelection')
       .mockReturnValue({ toString: () => '' } as Selection);
@@ -61,7 +61,7 @@ describe('useLLMDialog', () => {
     selectionSpy.mockRestore();
   });
 
-  it('returns empty string when no active note', () => {
+  it('restituisce una stringa vuota quando non c\'è una nota attiva', () => {
     const selectionSpy = vi
       .spyOn(window, 'getSelection')
       .mockReturnValue({ toString: () => '' } as Selection);
@@ -81,7 +81,7 @@ describe('useLLMDialog', () => {
     selectionSpy.mockRestore();
   });
 
-  it('opens loading dialog and sets selection flag', () => {
+  it('apre la finestra di caricamento e imposta il flag di selezione', () => {
     const editorInstance = {
       codemirror: {
         getSelection: vi.fn(() => 'abc'),
@@ -105,7 +105,7 @@ describe('useLLMDialog', () => {
     expect(result.current.dialogHasSelection).toBe(true);
   });
 
-  it('sets dialog result and prompt', () => {
+  it('imposta il risultato della finestra e il prompt', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -121,7 +121,7 @@ describe('useLLMDialog', () => {
     expect(result.current.dialogText).toBe('new text');
   });
 
-  it('aborts current generation', () => {
+  it('interrompe la generazione attuale', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -140,7 +140,7 @@ describe('useLLMDialog', () => {
     expect(result.current.dialogText).toBe("Generazione annullata dall'utente.");
   });
 
-  it('replace handler is a no-op without editor', () => {
+  it('il handler di sostituzione è un\'operazione no-op senza editor', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -152,7 +152,7 @@ describe('useLLMDialog', () => {
     expect(setSnackbar).not.toHaveBeenCalled();
   });
 
-  it('replaces text and saves history when prompt exists', () => {
+  it('sostituisce il testo e salva la cronologia quando il prompt esiste', () => {
     const replaceSelection = vi.fn();
     const editorInstance = {
       codemirror: {
@@ -190,7 +190,7 @@ describe('useLLMDialog', () => {
     });
   });
 
-  it('inserts below selection using replaceRange when selections exist', () => {
+  it('inserisce sotto la selezione usando replaceRange quando le selezioni esistono', () => {
     const replaceRange = vi.fn();
     const editorInstance = {
       codemirror: {
@@ -223,7 +223,7 @@ describe('useLLMDialog', () => {
     });
   });
 
-  it('inserts via replaceSelection when no selections exist', () => {
+  it('inserisce tramite replaceSelection quando non ci sono selezioni', () => {
     const replaceSelection = vi.fn();
     const editorInstance = {
       codemirror: {
@@ -248,7 +248,7 @@ describe('useLLMDialog', () => {
     expect(replaceSelection).toHaveBeenCalledWith('inline\n\n');
   });
 
-  it('creates a new note from result based on action type', () => {
+  it('crea una nuova nota dal risultato in base al tipo di azione', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -271,7 +271,7 @@ describe('useLLMDialog', () => {
     expect(out[1].content).toBe('tradotto');
   });
 
-  it('does nothing when creating new note without active note', () => {
+  it('non fa nulla quando crea una nuova nota senza una nota attiva', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, undefined, '', setNotes, setSnackbar)
     );
@@ -283,7 +283,7 @@ describe('useLLMDialog', () => {
     expect(setNotes).not.toHaveBeenCalled();
   });
 
-  it('close handler aborts when loading and copy handler shows snackbar', () => {
+  it('il handler di chiusura interrompe durante il caricamento e il handler di copia mostra la snackbar', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -305,7 +305,7 @@ describe('useLLMDialog', () => {
     });
   });
 
-  it('aborts ongoing request on unmount', () => {
+  it('interrompe la richiesta in corso al momento dello smontaggio', () => {
     const { result, unmount } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -319,7 +319,7 @@ describe('useLLMDialog', () => {
 
     expect(signal!.aborted).toBe(true);
   });
-  it('exposes getSelectionText and returns note unchanged for non-active ids in history save', () => {
+  it('espone getSelectionText e restituisce la nota invariata per id non attivi nel salvataggio della cronologia', () => {
     const editorInstance = {
       codemirror: {
         getSelection: vi.fn(() => 'picked'),
@@ -348,7 +348,7 @@ describe('useLLMDialog', () => {
 
     expect(updated[1]).toEqual(other);
   });
-  it('insert-below is a no-op without editor instance', () => {
+  it('l\'inserimento-sotto è un\'operazione no-op senza un\'istanza dell\'editor', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -360,7 +360,7 @@ describe('useLLMDialog', () => {
     expect(setSnackbar).not.toHaveBeenCalled();
   });
 
-  it('uses head position when anchor is not below', () => {
+  it('utilizza la posizione head quando l\'anchor non è sotto', () => {
     const replaceRange = vi.fn();
     const editorInstance = {
       codemirror: {
@@ -390,7 +390,7 @@ describe('useLLMDialog', () => {
     expect(replaceRange).toHaveBeenCalledWith('\n\ntail\n\n', { line: 2, ch: 3 });
   });
 
-  it('close handler works when dialog is not loading', () => {
+  it('il handler di chiusura funziona quando la finestra non è in caricamento', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -407,7 +407,7 @@ describe('useLLMDialog', () => {
 
     expect(result.current.dialogOpen).toBe(false);
   });
-  it('abortCurrent works even when no abort signal was created', () => {
+  it('abortCurrent funziona anche quando nessun segnale di interruzione è stato creato', () => {
     const { result } = renderHook(() =>
       useLLMDialog(null, note, note.id, setNotes, setSnackbar)
     );
@@ -419,7 +419,7 @@ describe('useLLMDialog', () => {
     expect(result.current.dialogText).toBe("Generazione annullata dall'utente.");
   });
 
-  it('replace saves snackbar without writing history when prompt is missing', () => {
+  it('la sostituzione salva la snackbar senza scrivere la cronologia quando il prompt è mancante', () => {
     const replaceSelection = vi.fn();
     const editorInstance = {
       codemirror: {
@@ -445,7 +445,7 @@ describe('useLLMDialog', () => {
     expect(setNotes).not.toHaveBeenCalled();
   });
 
-  it('uses anchor when selection is on the same line but anchor ch is greater', () => {
+  it('utilizza l\'anchor quando la selezione è sulla stessa riga ma ch dell\'anchor è maggiore', () => {
     const replaceRange = vi.fn();
     const editorInstance = {
       codemirror: {
