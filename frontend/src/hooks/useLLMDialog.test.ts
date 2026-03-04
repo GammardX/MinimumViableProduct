@@ -1,12 +1,14 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useLLMDialog } from './useLLMDialog';
+import type { Note } from '../types/types';
 
-const note = {
+const note: Note = {
   id: 'n1',
   title: 'Base',
   content: 'original content',
   createdAt: 1,
+  aiHistory: [],
 };
 
 describe('useLLMDialog', () => {
@@ -40,18 +42,38 @@ describe('useLLMDialog', () => {
     expect(result.current.llmBridge.hasSelection()).toBe(true);
   });
 
-  it('falls back to active note content or empty string', () => {
+  it('returns active note content when available', () => {
     const selectionSpy = vi
       .spyOn(window, 'getSelection')
       .mockReturnValue({ toString: () => '' } as Selection);
 
-    const { result, rerender } = renderHook(
+    const { result } = renderHook<
+      ReturnType<typeof useLLMDialog>,
+      { activeNote?: typeof note }
+    >(
       ({ activeNote }) =>
         useLLMDialog(null, activeNote, activeNote?.id ?? '', setNotes, setSnackbar),
       { initialProps: { activeNote: note } }
     );
 
     expect(result.current.llmBridge.currentText()).toBe('original content');
+
+    selectionSpy.mockRestore();
+  });
+
+  it('returns empty string when no active note', () => {
+    const selectionSpy = vi
+      .spyOn(window, 'getSelection')
+      .mockReturnValue({ toString: () => '' } as Selection);
+
+    const { result, rerender } = renderHook<
+      ReturnType<typeof useLLMDialog>,
+      { activeNote?: typeof note }
+    >(
+      ({ activeNote }) =>
+        useLLMDialog(null, activeNote, activeNote?.id ?? '', setNotes, setSnackbar),
+      { initialProps: { activeNote: note } }
+    );
 
     rerender({ activeNote: undefined });
     expect(result.current.llmBridge.currentText()).toBe('');

@@ -137,6 +137,7 @@ describe('fileService', () => {
     vi.advanceTimersByTime(100);
     expect(revokeSpy).toHaveBeenCalledWith('blob:classic-url');
   });
+  
   it('falls back to classic export flow when modern save API fails', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const clickSpy = vi

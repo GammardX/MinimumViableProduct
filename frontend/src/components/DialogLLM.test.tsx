@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import DialogLLM from './DialogLLM';
 
@@ -34,10 +33,9 @@ describe('DialogLLM', () => {
     expect(screen.getByText('Nessun risultato')).toBeInTheDocument();
   });
 
-  it('shows insert buttons with selection and triggers handlers', async () => {
+  it('calls onReplace when Sostituisci Testo button is clicked', async () => {
     const user = userEvent.setup();
     const onReplace = vi.fn();
-    const onInsertBelow = vi.fn();
 
     render(
       <DialogLLM
@@ -48,14 +46,34 @@ describe('DialogLLM', () => {
         hasSelection
         onClose={vi.fn()}
         onReplace={onReplace}
-        onInsertBelow={onInsertBelow}
+        onInsertBelow={vi.fn()}
       />
     );
 
     await user.click(screen.getByRole('button', { name: 'Sostituisci Testo' }));
-    await user.click(screen.getByRole('button', { name: 'Inserisci Sotto' }));
 
     expect(onReplace).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onInsertBelow when Inserisci Sotto button is clicked', async () => {
+    const user = userEvent.setup();
+    const onInsertBelow = vi.fn();
+
+    render(
+      <DialogLLM
+        text='ok text'
+        open
+        loading={false}
+        actionType='insert'
+        hasSelection
+        onClose={vi.fn()}
+        onReplace={vi.fn()}
+        onInsertBelow={onInsertBelow}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Inserisci Sotto' }));
+
     expect(onInsertBelow).toHaveBeenCalledTimes(1);
   });
 
@@ -78,7 +96,7 @@ describe('DialogLLM', () => {
     expect(onCreateNewNote).toHaveBeenCalledTimes(1);
   });
 
-  it('copies valid text with and without onCopySuccess', async () => {
+  it('calls onCopySuccess when copy succeeds with callback', async () => {
     const user = userEvent.setup();
     const onCopySuccess = vi.fn();
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -87,20 +105,41 @@ describe('DialogLLM', () => {
       value: { writeText },
     });
 
-    const { rerender } = render(
+    render(
       <DialogLLM text='copy me' open loading={false} onClose={vi.fn()} onCopySuccess={onCopySuccess} />
     );
 
     await user.click(screen.getByRole('button', { name: 'Copia' }));
-    expect(onCopySuccess).toHaveBeenCalledTimes(1);
 
-    rerender(<DialogLLM text='copy me too' open loading={false} onClose={vi.fn()} />);
+    expect(onCopySuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('copies text to clipboard when onCopySuccess is not provided', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    render(
+      <DialogLLM text='copy me too' open loading={false} onClose={vi.fn()} />
+    );
+
     await user.click(screen.getByRole('button', { name: 'Copia' }));
 
     expect(writeText).toHaveBeenCalledWith('copy me too');
   });
 
-  it('does not copy invalid text and logs copy errors', async () => {
+  it('does not show copy button for invalid text', () => {
+    render(
+      <DialogLLM text="Generazione annullata dall'utente." open loading={false} onClose={vi.fn()} />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Copia' })).not.toBeInTheDocument();
+  });
+
+  it('logs copy errors when clipboard fails', async () => {
     const user = userEvent.setup();
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const writeText = vi.fn().mockRejectedValue(new Error('denied'));
@@ -109,15 +148,13 @@ describe('DialogLLM', () => {
       value: { writeText },
     });
 
-    const { rerender } = render(
-      <DialogLLM text="Generazione annullata dall'utente." open loading={false} onClose={vi.fn()} />
+    render(
+      <DialogLLM text='x' open loading={false} onClose={vi.fn()} />
     );
 
-    expect(screen.queryByRole('button', { name: 'Copia' })).not.toBeInTheDocument();
-
-    rerender(<DialogLLM text='x' open loading={false} onClose={vi.fn()} />);
     await user.click(screen.getByRole('button', { name: 'Copia' }));
     await Promise.resolve();
+
     expect(errorSpy).toHaveBeenCalledTimes(1);
   });
 });

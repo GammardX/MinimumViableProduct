@@ -73,6 +73,7 @@ describe('useSidebarResize', () => {
 
     expect(result.current.sidebarWidth).toBe(250);
   });
+  
   it('ignores mousemove when not resizing', () => {
     const { result } = renderHook(() => useSidebarResize());
 

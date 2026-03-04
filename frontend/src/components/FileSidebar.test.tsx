@@ -11,42 +11,117 @@ const notes = [
 ];
 
 describe('FileSidebar', () => {
-  it('triggers create/import/export/select/delete actions', async () => {
+  it('calls onCreate when create button is clicked', async () => {
     const user = userEvent.setup();
-    const onSelect = vi.fn();
     const onCreate = vi.fn();
-    const onDelete = vi.fn();
-    const onRename = vi.fn();
+
+    render(
+      <FileSidebar
+        notes={notes}
+        activeId='1'
+        onSelect={vi.fn()}
+        onCreate={onCreate}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onImport={vi.fn()}
+        onExport={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByTitle('Nuova nota'));
+
+    expect(onCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onImport when import button is clicked', async () => {
+    const user = userEvent.setup();
     const onImport = vi.fn();
+
+    render(
+      <FileSidebar
+        notes={notes}
+        activeId='1'
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onImport={onImport}
+        onExport={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByTitle('Carica da file'));
+
+    expect(onImport).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onExport when export button is clicked', async () => {
+    const user = userEvent.setup();
     const onExport = vi.fn();
 
     render(
       <FileSidebar
         notes={notes}
         activeId='1'
-        onSelect={onSelect}
-        onCreate={onCreate}
-        onDelete={onDelete}
-        onRename={onRename}
-        onImport={onImport}
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onImport={vi.fn()}
         onExport={onExport}
       />
     );
 
-    await user.click(screen.getByTitle('Nuova nota'));
-    await user.click(screen.getByTitle('Carica da file'));
     await user.click(screen.getByTitle('Salva nota su disco'));
+
+    expect(onExport).toHaveBeenCalledWith('1');
+  });
+
+  it('calls onSelect when note is clicked', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+
+    render(
+      <FileSidebar
+        notes={notes}
+        activeId='1'
+        onSelect={onSelect}
+        onCreate={vi.fn()}
+        onDelete={vi.fn()}
+        onRename={vi.fn()}
+        onImport={vi.fn()}
+        onExport={vi.fn()}
+      />
+    );
+
     await user.click(screen.getByText('Two'));
+
+    expect(onSelect).toHaveBeenCalledWith('2');
+  });
+
+  it('calls onDelete when delete button is clicked', async () => {
+    const user = userEvent.setup();
+    const onDelete = vi.fn();
+
+    render(
+      <FileSidebar
+        notes={notes}
+        activeId='1'
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onDelete={onDelete}
+        onRename={vi.fn()}
+        onImport={vi.fn()}
+        onExport={vi.fn()}
+      />
+    );
+
     await user.click(screen.getAllByTitle('Elimina')[0]);
 
-    expect(onCreate).toHaveBeenCalledTimes(1);
-    expect(onImport).toHaveBeenCalledTimes(1);
-    expect(onExport).toHaveBeenCalledWith('1');
-    expect(onSelect).toHaveBeenCalledWith('2');
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 
-  it('renames note on enter and cancels on escape', async () => {
+  it('renames note when enter is pressed', async () => {
     const user = userEvent.setup();
     const onRename = vi.fn();
 
@@ -69,11 +144,30 @@ describe('FileSidebar', () => {
     await user.type(input, 'Renamed{Enter}');
 
     expect(onRename).toHaveBeenCalledWith('1', 'Renamed');
+  });
+
+  it('cancels rename when escape is pressed', async () => {
+    const user = userEvent.setup();
+    const onRename = vi.fn();
+
+    render(
+      <FileSidebar
+        notes={notes}
+        activeId='1'
+        onSelect={vi.fn()}
+        onCreate={vi.fn()}
+        onDelete={vi.fn()}
+        onRename={onRename}
+        onImport={vi.fn()}
+        onExport={vi.fn()}
+      />
+    );
 
     await user.dblClick(screen.getByText('Two'));
-    const input2 = screen.getByDisplayValue('Two');
-    await user.type(input2, '{Escape}');
-    expect(onRename).toHaveBeenCalledTimes(1);
+    const input = screen.getByDisplayValue('Two');
+    await user.type(input, '{Escape}');
+
+    expect(onRename).not.toHaveBeenCalled();
   });
 
   it('saves rename on blur only for non-empty title', async () => {

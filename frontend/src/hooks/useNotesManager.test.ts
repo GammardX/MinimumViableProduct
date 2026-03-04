@@ -61,8 +61,7 @@ describe('useNotesManager', () => {
     expect(mockedSet).toHaveBeenCalledWith(DB_KEY, expect.any(Array));
   });
 
-  it('handles load errors and shows snackbar', async () => {
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('shows snackbar when load fails', async () => {
     mockedGet.mockRejectedValue(new Error('db down'));
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -74,6 +73,15 @@ describe('useNotesManager', () => {
       message: 'Errore durante il caricamento delle note.',
       severity: 'error',
     });
+  });
+
+  it('logs an error to console on load failure', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockedGet.mockRejectedValue(new Error('db down'));
+
+    const { result } = renderHook(() => useNotesManager(setSnackbar));
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+
     expect(errSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -92,7 +100,7 @@ describe('useNotesManager', () => {
     });
   });
 
-  it('creates, updates and renames notes', async () => {
+  it('creates a new note and makes it active', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -101,20 +109,42 @@ describe('useNotesManager', () => {
     act(() => {
       result.current.handleCreateNote();
     });
+
     expect(result.current.notes).toHaveLength(2);
     expect(result.current.activeNoteId).toBe('1000');
+  });
+
+  it('updates note content correctly', async () => {
+    mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
+
+    const { result } = renderHook(() => useNotesManager(setSnackbar));
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
 
     act(() => {
+      result.current.setActiveNoteId('x');
       result.current.handleUpdateNote('new text');
+    });
+
+    const updated = result.current.notes.find((n) => n.id === 'x');
+    expect(updated?.content).toBe('new text');
+  });
+
+  it('renames a note after creation', async () => {
+    mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
+
+    const { result } = renderHook(() => useNotesManager(setSnackbar));
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+
+    act(() => {
+      result.current.handleCreateNote();
       result.current.handleRenameNote('1000', 'Renamed');
     });
 
     const created = result.current.notes.find((n) => n.id === '1000');
-    expect(created?.content).toBe('new text');
     expect(created?.title).toBe('Renamed');
   });
 
-  it('opens and cancels delete dialog', async () => {
+  it('opens delete dialog and prevents propagation', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
 
     const { result } = renderHook(() => useNotesManager(setSnackbar));
@@ -127,6 +157,17 @@ describe('useNotesManager', () => {
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
     expect(result.current.deleteDialogOpen).toBe(true);
+  });
+
+  it('cancels delete dialog when requested', async () => {
+    mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'old', createdAt: 1 }]);
+
+    const { result } = renderHook(() => useNotesManager(setSnackbar));
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+
+    act(() => {
+      result.current.handleDeleteNote('x', { stopPropagation: vi.fn() } as unknown as React.MouseEvent);
+    });
 
     act(() => {
       result.current.cancelDelete();
@@ -245,6 +286,7 @@ describe('useNotesManager', () => {
     expect(mockedFileService.exportFile).toHaveBeenCalledTimes(1);
     expect(mockedFileService.exportFile).toHaveBeenCalledWith('X', 'x');
   });
+
   it('clears active id when deleting the last active note', async () => {
     mockedGet.mockResolvedValue([{ id: 'x', title: 'X', content: 'x', createdAt: 1 }]);
 
@@ -262,6 +304,7 @@ describe('useNotesManager', () => {
     expect(result.current.notes).toHaveLength(0);
     expect(result.current.activeNoteId).toBe('');
   });
+
   it('keeps active id when deleting a non-active note', async () => {
     mockedGet.mockResolvedValue([
       { id: 'x', title: 'X', content: 'x', createdAt: 1 },
@@ -284,4 +327,3 @@ describe('useNotesManager', () => {
     expect(result.current.activeNoteId).toBe('x');
   });
 });
-

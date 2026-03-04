@@ -32,7 +32,7 @@ describe('useNavigation', () => {
     expect(setActiveNoteId).toHaveBeenCalledWith('2');
   });
 
-  it('navigates by note title (case-insensitive, decoded)', () => {
+  it('navigates by note title when url-encoded (case-insensitive)', () => {
     const { result } = renderHook(() =>
       useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
     );
@@ -42,6 +42,62 @@ describe('useNavigation', () => {
     });
 
     expect(setActiveNoteId).toHaveBeenCalledWith('2');
+  });
+
+  it('navigates by unencoded note title with spaces (case-insensitive)', () => {
+    const { result } = renderHook(() =>
+      useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
+    );
+
+    act(() => {
+      result.current.handleNavigate('BETA note');
+    });
+
+    expect(setActiveNoteId).toHaveBeenCalledWith('2');
+  });
+
+  it('navigates by uppercase plain title', () => {
+    const { result } = renderHook(() =>
+      useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
+    );
+
+    act(() => {
+      result.current.handleNavigate('ALPHA');
+    });
+
+    expect(setActiveNoteId).toHaveBeenCalledWith('1');
+  });
+
+  it('fails when plus sign is present (not treated as space)', () => {
+    const { result } = renderHook(() =>
+      useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
+    );
+
+    act(() => {
+      result.current.handleNavigate('beta+note');
+    });
+
+    expect(setSnackbar).toHaveBeenCalledWith({
+      open: true,
+      message: 'Nota "beta+note" non trovata!',
+      severity: 'error',
+    });
+  });
+
+  it('shows error when decoded target contains extra whitespace', () => {
+    const { result } = renderHook(() =>
+      useNavigation(notes, notes[0], setActiveNoteId, setSnackbar)
+    );
+
+    act(() => {
+      result.current.handleNavigate('1%20'); // decodes to "1 " which doesn't match id
+    });
+
+    expect(setSnackbar).toHaveBeenCalledWith({
+      open: true,
+      message: 'Nota "1 " non trovata!',
+      severity: 'error',
+    });
   });
 
   it('scrolls to anchor when provided', () => {
@@ -140,6 +196,7 @@ describe('useNavigation', () => {
 
     expect(errorSpy).toHaveBeenCalledTimes(1);
   });
+
   it('does not scroll when anchor element is missing', () => {
     const getByIdSpy = vi.spyOn(document, 'getElementById').mockReturnValue(null);
 

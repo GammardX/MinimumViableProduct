@@ -99,16 +99,8 @@ describe('MarkdownEditor', () => {
     expect(focus).toHaveBeenCalled();
   });
 
-  it('handles preview click branches for note/anchor/no-anchor/no-link', () => {
+  it('handles preview click for note link', () => {
     const onNavigate = vi.fn();
-    const scrollIntoView = vi.fn();
-
-    vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
-      if (id === 'raw-anchor') return { scrollIntoView } as any;
-      if (id === 'anchorid') return { scrollIntoView } as any;
-      return null;
-    });
-
     const { container } = render(<MarkdownEditor initialValue='x' onNavigate={onNavigate} />);
     const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
@@ -117,31 +109,76 @@ describe('MarkdownEditor', () => {
     wrapper.appendChild(noteLink);
     fireEvent.click(noteLink);
 
+    expect(onNavigate).toHaveBeenCalledWith('note-1', 'sec');
+  });
+
+  it('handles preview click for raw anchor link', () => {
+    const scrollIntoView = vi.fn();
+    vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
+      if (id === 'raw-anchor') return { scrollIntoView } as any;
+      return null;
+    });
+
+    const { container } = render(<MarkdownEditor initialValue='x' />);
+    const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
+
     const anchorRaw = document.createElement('a');
     anchorRaw.setAttribute('href', '#raw-anchor');
     wrapper.appendChild(anchorRaw);
     fireEvent.click(anchorRaw);
+
+    expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('handles preview click for normalized anchor link', () => {
+    const scrollIntoView = vi.fn();
+    vi.spyOn(document, 'getElementById').mockImplementation((id: string) => {
+      if (id === 'anchorid') return { scrollIntoView } as any;
+      return null;
+    });
+
+    const { container } = render(<MarkdownEditor initialValue='x' />);
+    const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
     const anchorNormalized = document.createElement('a');
     anchorNormalized.setAttribute('href', '#Anchor Id');
     wrapper.appendChild(anchorNormalized);
     fireEvent.click(anchorNormalized);
 
+    expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it('handles preview click for missing anchor without crashing', () => {
+    vi.spyOn(document, 'getElementById').mockReturnValue(null);
+
+    const { container } = render(<MarkdownEditor initialValue='x' />);
+    const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
+
     const missingAnchor = document.createElement('a');
     missingAnchor.setAttribute('href', '#not-found');
     wrapper.appendChild(missingAnchor);
-    fireEvent.click(missingAnchor);
+
+    expect(() => fireEvent.click(missingAnchor)).not.toThrow();
+  });
+
+  it('handles preview click on link without href', () => {
+    const { container } = render(<MarkdownEditor initialValue='x' />);
+    const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
     const noHref = document.createElement('a');
     wrapper.appendChild(noHref);
-    fireEvent.click(noHref);
+
+    expect(() => fireEvent.click(noHref)).not.toThrow();
+  });
+
+  it('handles preview click on non-link element', () => {
+    const { container } = render(<MarkdownEditor initialValue='x' />);
+    const wrapper = container.querySelector('.editor-fade-container') as HTMLDivElement;
 
     const plain = document.createElement('span');
     wrapper.appendChild(plain);
-    fireEvent.click(plain);
 
-    expect(onNavigate).toHaveBeenCalledWith('note-1', 'sec');
-    expect(scrollIntoView).toHaveBeenCalled();
+    expect(() => fireEvent.click(plain)).not.toThrow();
   });
 
   it('does not call onNavigate when not provided', () => {
