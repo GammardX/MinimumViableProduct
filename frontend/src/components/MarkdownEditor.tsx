@@ -47,30 +47,44 @@ export default function MarkdownEditor({
                         const cursor = cm.getCursor();
                         let startLine = 0;
                         let headingLevel = 0;
-                        
+
                         for (let i = cursor.line; i >= 0; i--) {
-                            const match = cm.getLine(i).match(/^(#{1,6})\s/);
+                            const lineText = cm.getLine(i);
+                            const match = lineText.match(/^(#{1,6})\s/);
+                            
                             if (match) {
-                                startLine = i;
-                                headingLevel = match[1].length;
-                                break;
-                            }
-                        }
-                        
-                        let endLine = cm.lineCount() - 1;
-                        let endChar = cm.getLine(endLine).length;
-                        
-                        if (headingLevel > 0) {
-                            for (let i = startLine + 1; i < cm.lineCount(); i++) {
-                                const match = cm.getLine(i).match(/^(#{1,6})\s/);
-                                if (match && match[1].length <= headingLevel) {
-                                    endLine = i - 1; 
-                                    endChar = Math.max(0, cm.getLine(endLine).length);
+                                const tokenType = cm.getTokenTypeAt({ line: i, ch: match[0].length });
+                                if (tokenType && tokenType.includes("header")) {
+                                    startLine = i;
+                                    headingLevel = match[1].length;
                                     break;
                                 }
                             }
                         }
+
+                        let endLine = cm.lineCount() - 1;
                         
+                        if (headingLevel > 0) {
+                            for (let i = startLine + 1; i < cm.lineCount(); i++) {
+                                const lineText = cm.getLine(i);
+                                const match = lineText.match(/^(#{1,6})\s/);
+                                
+                                if (match && match[1].length <= headingLevel) {
+                                    const tokenType = cm.getTokenTypeAt({ line: i, ch: match[0].length });
+                                    if (tokenType && tokenType.includes("header")) {
+                                        endLine = i - 1; 
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        while (endLine > startLine && cm.getLine(endLine).trim() === '') {
+                            endLine--;
+                        }
+
+                        const endChar = cm.getLine(endLine).length;
+
                         cm.setSelection(
                             { line: startLine, ch: 0 }, 
                             { line: endLine, ch: endChar }
