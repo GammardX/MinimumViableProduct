@@ -43,54 +43,56 @@ export default function MarkdownEditor({
                 {
                     name: "select-chapter",
                     action: (editor: EasyMDE) => {
-                        const cm = editor.codemirror;
-                        const cursor = cm.getCursor();
-                        let startLine = 0;
-                        let headingLevel = 0;
+                    const cm = editor.codemirror;
+                    const cursor = cm.getCursor();
+                    let startLine = 0;
+                    let headingLevel = 0;
 
-                        for (let i = cursor.line; i >= 0; i--) {
+                    for (let i = cursor.line; i >= 0; i--) {
+                        const lineText = cm.getLine(i);
+                        const match = lineText.match(/^\s*(#{1,6})\s/);
+                        
+                        if (match) {
+                            const chPos = match[0].length - 1; 
+                            const tokenType = cm.getTokenTypeAt({ line: i, ch: chPos });
+                            if (tokenType && tokenType.includes("header")) {
+                                startLine = i;
+                                headingLevel = match[1].length;
+                                break;
+                            }
+                        }
+                    }
+
+                    let endLine = cm.lineCount() - 1;
+                    
+                    if (headingLevel > 0) {
+                        for (let i = startLine + 1; i < cm.lineCount(); i++) {
                             const lineText = cm.getLine(i);
-                            const match = lineText.match(/^(#{1,6})\s/);
+                            const match = lineText.match(/^\s*(#{1,6})\s/);
                             
-                            if (match) {
-                                const tokenType = cm.getTokenTypeAt({ line: i, ch: match[0].length });
+                            if (match && match[1].length <= headingLevel) {
+                                const chPos = match[0].length - 1;
+                                const tokenType = cm.getTokenTypeAt({ line: i, ch: chPos });
                                 if (tokenType && tokenType.includes("header")) {
-                                    startLine = i;
-                                    headingLevel = match[1].length;
+                                    endLine = i - 1; 
                                     break;
                                 }
                             }
                         }
+                    }
 
-                        let endLine = cm.lineCount() - 1;
-                        
-                        if (headingLevel > 0) {
-                            for (let i = startLine + 1; i < cm.lineCount(); i++) {
-                                const lineText = cm.getLine(i);
-                                const match = lineText.match(/^(#{1,6})\s/);
-                                
-                                if (match && match[1].length <= headingLevel) {
-                                    const tokenType = cm.getTokenTypeAt({ line: i, ch: match[0].length });
-                                    if (tokenType && tokenType.includes("header")) {
-                                        endLine = i - 1; 
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                    while (endLine > startLine && cm.getLine(endLine).trim() === '') {
+                        endLine--;
+                    }
 
-                        while (endLine > startLine && cm.getLine(endLine).trim() === '') {
-                            endLine--;
-                        }
+                    const endChar = cm.getLine(endLine).length;
 
-                        const endChar = cm.getLine(endLine).length;
-
-                        cm.setSelection(
-                            { line: startLine, ch: 0 }, 
-                            { line: endLine, ch: endChar }
-                        );
-                        cm.focus(); 
-                    },
+                    cm.setSelection(
+                        { line: startLine, ch: 0 }, 
+                        { line: endLine, ch: endChar }
+                    );
+                    cm.focus(); 
+                },
                     className: "fa fa-bookmark", 
                     title: "Seleziona l'intero capitolo",
                 },
