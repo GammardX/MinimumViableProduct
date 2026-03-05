@@ -37,9 +37,24 @@ export default function MarkdownEditor({
                 hljs: hljs
             },
             toolbar: [
-                'bold',
-                'italic',
-                'heading',
+                {
+                    name: "bold",
+                    action: EasyMDE.toggleBold,
+                    className: "fa fa-bold",
+                    title: "Grassetto", 
+                },
+                {
+                    name: "italic",
+                    action: EasyMDE.toggleItalic,
+                    className: "fa fa-italic",
+                    title: "Corsivo", 
+                },
+                {
+                    name: "heading",
+                    action: EasyMDE.toggleHeadingSmaller,
+                    className: "fa fa-header",
+                    title: "Titolo",
+                },
                 {
                     name: "select-chapter",
                     action: (editor: EasyMDE) => {
@@ -96,19 +111,64 @@ export default function MarkdownEditor({
                     className: "fa fa-bookmark", 
                     title: "Seleziona l'intero capitolo",
                 },
+                '|', 
+                {
+                    name: "code",
+                    action: (editor: EasyMDE) => EasyMDE.toggleCodeBlock(editor),
+                    className: "fa fa-code",
+                    title: "Codice",
+                },
+                {
+                    name: "quote",
+                    action: (editor: EasyMDE) => EasyMDE.toggleBlockquote(editor),
+                    className: "fa fa-quote-left",
+                    title: "Citazione",
+                },
+                {
+                    name: "unordered-list",
+                    action: EasyMDE.toggleUnorderedList,
+                    className: "fa fa-list-ul",
+                    title: "Lista puntata",
+                },
+                {
+                    name: "ordered-list",
+                    action: (editor: EasyMDE) => EasyMDE.toggleOrderedList(editor),
+                    className: "fa fa-list-ol",
+                    title: "Lista numerata",
+                },
+                {
+                    name: "table",
+                    action: EasyMDE.drawTable,
+                    className: "fa fa-table",
+                    title: "Tabella",
+                },
                 '|',
-                'code',
-                'quote',
-                'unordered-list',
-                'ordered-list',
-                'table',
+                {
+                    name: "link",
+                    action: EasyMDE.drawLink,
+                    className: "fa fa-link",
+                    title: "Inserisci Link",
+                },
+                {
+                    name: "image",
+                    action: (editor: EasyMDE) =>  EasyMDE.drawImage(editor),
+                    className: "fa fa-picture-o",
+                    title: "Inserisci Immagine",
+                },
                 '|',
-                'link',
-                'image',
-                '|',
-                'preview',
-                'side-by-side'
-            ] as any 
+                {
+                    name: "preview",
+                    action: EasyMDE.togglePreview,
+                    className: "fa fa-eye no-disable",
+                    title: "Anteprima",
+                },
+                {
+                    name: "side-by-side",
+                    action: EasyMDE.toggleSideBySide,
+                    className: "fa fa-columns no-disable no-mobile",
+                    title: "Modalità affiancata",
+                }
+            ] as any
         };
     }, []);
 
