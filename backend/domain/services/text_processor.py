@@ -3,14 +3,12 @@ Domain Service: Text Processor
 Orchestra i use cases per elaborazione testi
 """
 from application.ports.input import ITextProcessor
-from application.use_cases import (
-    SummarizeTextUseCase,
-    ImproveTextUseCase,
-    TranslateTextUseCase,
-    AnalyzeSixHatsUseCase,
-    GenerateTextUseCase
-)
-from domain.models import TextDocument, LLMResult
+from application.ports.input.use_cases import (IAnalyzeSixHatsUseCase,
+                                               IGenerateTextUseCase,
+                                               IImproveTextUseCase,
+                                               ISummarizeTextUseCase,
+                                               ITranslateTextUseCase)
+from domain.models import LLMResult, TextDocument
 
 
 class TextProcessorService(ITextProcessor):
@@ -18,11 +16,11 @@ class TextProcessorService(ITextProcessor):
     
     def __init__(
         self,
-        summarize_use_case: SummarizeTextUseCase,
-        improve_use_case: ImproveTextUseCase,
-        translate_use_case: TranslateTextUseCase,
-        six_hats_use_case: AnalyzeSixHatsUseCase,
-        generate_use_case: GenerateTextUseCase
+        summarize_use_case: ISummarizeTextUseCase,
+        improve_use_case: IImproveTextUseCase,
+        translate_use_case: ITranslateTextUseCase,
+        six_hats_use_case: IAnalyzeSixHatsUseCase,
+        generate_use_case: IGenerateTextUseCase
     ):
         self._summarize = summarize_use_case
         self._improve = improve_use_case

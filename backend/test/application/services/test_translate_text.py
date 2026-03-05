@@ -1,7 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from application.use_cases.translate_text import TranslateTextUseCase
-from domain.models import TextDocument, LLMResult, ResultStatus
+
+import pytest
+from domain.models import LLMResult, ResultStatus, TextDocument
+
+from backend.application.services.translate_text_service import \
+    TranslateTextService
+
 
 @pytest.fixture
 def use_case():
@@ -10,7 +14,7 @@ def use_case():
     prompt_builder = MagicMock()
     response_parser = MagicMock()
     
-    return TranslateTextUseCase(llm_provider, prompt_builder, response_parser), llm_provider, prompt_builder, response_parser
+    return TranslateTextService(llm_provider, prompt_builder, response_parser), llm_provider, prompt_builder, response_parser
 
 @pytest.mark.asyncio
 async def test_translate_empty_document_returns_invalid(use_case):

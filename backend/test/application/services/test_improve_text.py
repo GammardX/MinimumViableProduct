@@ -1,7 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from application.use_cases.improve_text import ImproveTextUseCase
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
+
+import pytest
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
+
+from backend.application.services.improve_text_service import \
+    ImproveTextService
+
 
 @pytest.fixture
 def mocks():
@@ -13,7 +17,7 @@ def mocks():
 
 @pytest.fixture
 def use_case(mocks):
-    return ImproveTextUseCase(
+    return ImproveTextService(
         llm_provider=mocks["llm"],
         prompt_builder=mocks["builder"],
         response_parser=mocks["parser"]

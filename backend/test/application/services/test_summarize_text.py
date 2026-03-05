@@ -1,7 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from application.use_cases.summarize_text import SummarizeTextUseCase
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
+
+import pytest
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
+
+from backend.application.services.summarize_text_service import \
+    SummarizeTextService
+
 
 @pytest.fixture
 def mocks():
@@ -15,7 +19,7 @@ def mocks():
 @pytest.fixture
 def use_case(mocks):
     """Fixture per inizializzare lo Use Case con i mock"""
-    return SummarizeTextUseCase(
+    return SummarizeTextService(
         llm_provider=mocks["llm"],
         prompt_builder=mocks["builder"],
         response_parser=mocks["parser"]

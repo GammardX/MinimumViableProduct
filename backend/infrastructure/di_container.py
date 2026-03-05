@@ -3,20 +3,14 @@ Infrastructure: Dependency Injection Container
 Wiring di tutte le dipendenze dell'applicazione
 """
 import os
-from infrastructure.config import Settings
-from adapters.output import (
-    LLMClientAdapter,
-    PromptBuilderAdapter,
-    JSONParserAdapter
-)
-from application.use_cases import (
-    SummarizeTextUseCase,
-    ImproveTextUseCase,
-    TranslateTextUseCase,
-    AnalyzeSixHatsUseCase,
-    GenerateTextUseCase
-)
+
+from adapters.output import (JSONParserAdapter, LLMClientAdapter,
+                             PromptBuilderAdapter)
+from application.services import (AnalyzeSixHatsService, GenerateTextService,
+                                  ImproveTextService, SummarizeTextService,
+                                  TranslateTextService)
 from domain.services import TextProcessorService
+from infrastructure.config import Settings
 
 
 class DIContainer:
@@ -63,11 +57,11 @@ class DIContainer:
             prompt_builder = PromptBuilderAdapter()
             response_parser = JSONParserAdapter()
             
-            summarize_uc = SummarizeTextUseCase(llm_provider, prompt_builder, response_parser)
-            improve_uc = ImproveTextUseCase(llm_provider, prompt_builder, response_parser)
-            translate_uc = TranslateTextUseCase(llm_provider, prompt_builder, response_parser)
-            six_hats_uc = AnalyzeSixHatsUseCase(llm_provider, prompt_builder, response_parser)
-            generate_uc = GenerateTextUseCase(llm_provider, prompt_builder, response_parser)
+            summarize_uc = SummarizeTextService(llm_provider, prompt_builder, response_parser)
+            improve_uc = ImproveTextService(llm_provider, prompt_builder, response_parser)
+            translate_uc = TranslateTextService(llm_provider, prompt_builder, response_parser)
+            six_hats_uc = AnalyzeSixHatsService(llm_provider, prompt_builder, response_parser)
+            generate_uc = GenerateTextService(llm_provider, prompt_builder, response_parser)
             
             self._instances["text_processor"] = TextProcessorService(
                 summarize_use_case=summarize_uc,

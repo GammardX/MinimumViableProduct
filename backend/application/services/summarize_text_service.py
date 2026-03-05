@@ -1,15 +1,15 @@
 """
-Use Case: Analyze Six Hats
-Analizza un documento con il metodo dei sei cappelli
+Use Case: Summarize Text
+Riassume un documento testuale riducendone la lunghezza
 """
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
-from application.ports.output import ILLMProvider, IPromptBuilder, IResponseParser
+from application.ports.input.use_cases import ISummarizeTextUseCase
+from application.ports.output import (ILLMProvider, IPromptBuilder,
+                                      IResponseParser)
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
 
 
-class AnalyzeSixHatsUseCase:
-    """Use Case per analisi sei cappelli"""
-    
-    VALID_HATS = ["bianco", "rosso", "nero", "giallo", "verde", "blu"]
+class SummarizeTextService(ISummarizeTextUseCase):
+    """Use Case per riassumere testo"""
     
     def __init__(
         self,
@@ -24,17 +24,17 @@ class AnalyzeSixHatsUseCase:
     async def execute(
         self, 
         document: TextDocument, 
-        hat: str
+        percentage: int = 30
     ) -> LLMResult:
         """
-        Esegue l'analisi del documento con un cappello specifico
+        Esegue il riassunto del documento
         
         Args:
-            document: Documento da analizzare
-            hat: Cappello da utilizzare (bianco, rosso, nero, giallo, verde, blu)
+            document: Documento da riassumere
+            percentage: Percentuale di riduzione (10-90)
             
         Returns:
-            LLMResult: Risultato dell'analisi
+            LLMResult: Risultato dell'operazione
         """
         
         if document.is_empty():
@@ -43,17 +43,16 @@ class AnalyzeSixHatsUseCase:
                 code=ResultCode.EMPTY_TEXT
             )
         
-        hat_lower = hat.lower() if hat else ""
-        if hat_lower not in self.VALID_HATS:
+        if not 10 <= percentage <= 90:
             return LLMResult(
                 status=ResultStatus.INVALID_INPUT,
                 code=ResultCode.EMPTY_TEXT,
-                violation_category=f"Cappello '{hat}' non supportato. Cappelli validi: {', '.join(self.VALID_HATS)}"
+                violation_category=f"La percentuale deve essere tra 10 e 90, ricevuto: {percentage}"
             )
         
-        messages = self._prompt_builder.build_six_hats_prompt(
+        messages = self._prompt_builder.build_summarize_prompt(
             document, 
-            hat
+            percentage
         )
         
         try:

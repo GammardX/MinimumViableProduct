@@ -1,13 +1,17 @@
 """
-Use Case: Translate Text
-Traduce un documento in un'altra lingua
+Use Case: Analyze Six Hats
+Analizza un documento con il metodo dei sei cappelli
 """
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
-from application.ports.output import ILLMProvider, IPromptBuilder, IResponseParser
+from application.ports.input.use_cases import IAnalyzeSixHatsUseCase
+from application.ports.output import (ILLMProvider, IPromptBuilder,
+                                      IResponseParser)
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
 
 
-class TranslateTextUseCase:
-    """Use Case per tradurre testo"""
+class AnalyzeSixHatsService(IAnalyzeSixHatsUseCase):
+    """Use Case per analisi sei cappelli"""
+    
+    VALID_HATS = ["bianco", "rosso", "nero", "giallo", "verde", "blu"]
     
     def __init__(
         self,
@@ -22,17 +26,17 @@ class TranslateTextUseCase:
     async def execute(
         self, 
         document: TextDocument, 
-        target_language: str
+        hat: str
     ) -> LLMResult:
         """
-        Esegue la traduzione del documento
+        Esegue l'analisi del documento con un cappello specifico
         
         Args:
-            document: Documento da tradurre
-            target_language: Lingua di destinazione
+            document: Documento da analizzare
+            hat: Cappello da utilizzare (bianco, rosso, nero, giallo, verde, blu)
             
         Returns:
-            LLMResult: Risultato dell'operazione
+            LLMResult: Risultato dell'analisi
         """
         
         if document.is_empty():
@@ -41,16 +45,17 @@ class TranslateTextUseCase:
                 code=ResultCode.EMPTY_TEXT
             )
         
-        if not target_language or target_language.strip() == "":
+        hat_lower = hat.lower() if hat else ""
+        if hat_lower not in self.VALID_HATS:
             return LLMResult(
                 status=ResultStatus.INVALID_INPUT,
                 code=ResultCode.EMPTY_TEXT,
-                violation_category="Lingua di destinazione non specificata"
+                violation_category=f"Cappello '{hat}' non supportato. Cappelli validi: {', '.join(self.VALID_HATS)}"
             )
         
-        messages = self._prompt_builder.build_translate_prompt(
+        messages = self._prompt_builder.build_six_hats_prompt(
             document, 
-            target_language
+            hat
         )
         
         try:

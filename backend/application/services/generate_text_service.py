@@ -1,14 +1,15 @@
 """
-Use Case: Summarize Text
-Riassume un documento testuale riducendone la lunghezza
+Use Case: Generate Text
+Genera testo basato su un prompt dell'utente
 """
+from application.ports.input.use_cases import IGenerateTextUseCase
 from application.ports.output import (ILLMProvider, IPromptBuilder,
                                       IResponseParser)
-from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
+from domain.models import LLMResult, ResultCode, ResultStatus
 
 
-class SummarizeTextUseCase:
-    """Use Case per riassumere testo"""
+class GenerateTextService(IGenerateTextUseCase):
+    """Use Case per generare testo"""
     
     def __init__(
         self,
@@ -22,36 +23,23 @@ class SummarizeTextUseCase:
     
     async def execute(
         self, 
-        document: TextDocument, 
-        percentage: int = 30
+        prompt: str,
+        context_text: str = "",
+        word_count: int = 300
     ) -> LLMResult:
-        """
-        Esegue il riassunto del documento
+        """Esegue la generazione di testo"""
         
-        Args:
-            document: Documento da riassumere
-            percentage: Percentuale di riduzione (10-90)
-            
-        Returns:
-            LLMResult: Risultato dell'operazione
-        """
-        
-        if document.is_empty():
+        if not prompt or prompt.strip() == "":
             return LLMResult(
                 status=ResultStatus.INVALID_INPUT,
-                code=ResultCode.EMPTY_TEXT
+                code=ResultCode.EMPTY_PROMPT,
+                violation_category="Il prompt non può essere vuoto"
             )
         
-        if not 10 <= percentage <= 90:
-            return LLMResult(
-                status=ResultStatus.INVALID_INPUT,
-                code=ResultCode.EMPTY_TEXT,
-                violation_category=f"La percentuale deve essere tra 10 e 90, ricevuto: {percentage}"
-            )
-        
-        messages = self._prompt_builder.build_summarize_prompt(
-            document, 
-            percentage
+        messages = self._prompt_builder.build_generate_prompt(
+            prompt, 
+            context_text, 
+            word_count
         )
         
         try:

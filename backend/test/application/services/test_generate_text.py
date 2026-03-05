@@ -1,7 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from application.use_cases.generate_text import GenerateTextUseCase
-from domain.models import LLMResult, ResultStatus, ResultCode
+
+import pytest
+from domain.models import LLMResult, ResultCode, ResultStatus
+
+from backend.application.services.generate_text_service import \
+    GenerateTextService
+
 
 @pytest.fixture
 def mocks():
@@ -13,7 +17,7 @@ def mocks():
 
 @pytest.fixture
 def use_case(mocks):
-    return GenerateTextUseCase(
+    return GenerateTextService(
         llm_provider=mocks["llm"],
         prompt_builder=mocks["builder"],
         response_parser=mocks["parser"]

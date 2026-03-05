@@ -1,7 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock
-from application.use_cases.analyze_six_hats import AnalyzeSixHatsUseCase
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
+
+import pytest
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
+
+from backend.application.services.analyze_six_hats_service import \
+    AnalyzeSixHatsService
+
 
 @pytest.fixture
 def mocks():
@@ -13,7 +17,7 @@ def mocks():
 
 @pytest.fixture
 def use_case(mocks):
-    return AnalyzeSixHatsUseCase(
+    return AnalyzeSixHatsService(
         llm_provider=mocks["llm"],
         prompt_builder=mocks["builder"],
         response_parser=mocks["parser"]

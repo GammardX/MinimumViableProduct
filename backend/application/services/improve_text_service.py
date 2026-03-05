@@ -2,11 +2,13 @@
 Use Case: Improve Text
 Migliora un documento testuale secondo un criterio
 """
-from domain.models import TextDocument, LLMResult, ResultStatus, ResultCode
-from application.ports.output import ILLMProvider, IPromptBuilder, IResponseParser
+from application.ports.input.use_cases import IImproveTextUseCase
+from application.ports.output import (ILLMProvider, IPromptBuilder,
+                                      IResponseParser)
+from domain.models import LLMResult, ResultCode, ResultStatus, TextDocument
 
 
-class ImproveTextUseCase:
+class ImproveTextService(IImproveTextUseCase):
     """Use Case per migliorare testo"""
     
     def __init__(
