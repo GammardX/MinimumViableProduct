@@ -21,7 +21,7 @@ class ImproveTextService(IImproveTextUseCase):
         self._prompt_builder = prompt_builder
         self._response_parser = response_parser
     
-    async def execute(
+    async def improve_text(
         self, 
         document: TextDocument, 
         criterion: str = "chiarezza e stile professionale"

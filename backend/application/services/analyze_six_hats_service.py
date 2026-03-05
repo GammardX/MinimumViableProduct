@@ -23,7 +23,7 @@ class AnalyzeSixHatsService(IAnalyzeSixHatsUseCase):
         self._prompt_builder = prompt_builder
         self._response_parser = response_parser
     
-    async def execute(
+    async def analyze_six_hats(
         self, 
         document: TextDocument, 
         hat: str

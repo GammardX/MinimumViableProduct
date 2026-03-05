@@ -21,7 +21,7 @@ class ISummarizeTextUseCase(ABC):
     """
     
     @abstractmethod
-    async def execute(
+    async def summarize_text(
         self, 
         document: TextDocument, 
         percentage: int

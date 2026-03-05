@@ -21,7 +21,7 @@ class ITranslateTextUseCase(ABC):
     """
     
     @abstractmethod
-    async def execute(
+    async def translate_text(
         self, 
         document: TextDocument, 
         target_language: str

@@ -21,7 +21,7 @@ class GenerateTextService(IGenerateTextUseCase):
         self._prompt_builder = prompt_builder
         self._response_parser = response_parser
     
-    async def execute(
+    async def generate_text(
         self, 
         prompt: str,
         context_text: str = "",

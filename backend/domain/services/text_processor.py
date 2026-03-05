@@ -34,7 +34,7 @@ class TextProcessorService(ITextProcessor):
         percentage: int
     ) -> LLMResult:
         """Delega al use case specifico"""
-        return await self._summarize.execute(document, percentage)
+        return await self._summarize.summarize_text(document, percentage)
     
     async def improve(
         self, 
@@ -42,7 +42,7 @@ class TextProcessorService(ITextProcessor):
         criterion: str
     ) -> LLMResult:
         """Delega al use case specifico"""
-        return await self._improve.execute(document, criterion)
+        return await self._improve.improve_text(document, criterion)
     
     async def translate(
         self, 
@@ -50,7 +50,7 @@ class TextProcessorService(ITextProcessor):
         target_language: str
     ) -> LLMResult:
         """Delega al use case specifico"""
-        return await self._translate.execute(document, target_language)
+        return await self._translate.translate_text(document, target_language)
     
     async def analyze_six_hats(
         self, 
@@ -58,7 +58,7 @@ class TextProcessorService(ITextProcessor):
         hat: str
     ) -> LLMResult:
         """Delega al use case specifico"""
-        return await self._six_hats.execute(document, hat)
+        return await self._six_hats.analyze_six_hats(document, hat)
     
     async def generate(
         self,
@@ -67,7 +67,7 @@ class TextProcessorService(ITextProcessor):
         word_count: int = 300
     ) -> LLMResult:
         """Delega al use case specifico per la generazione di testo"""
-        return await self._generate.execute(
+        return await self._generate.generate_text(
             prompt, 
             context_text, 
             word_count

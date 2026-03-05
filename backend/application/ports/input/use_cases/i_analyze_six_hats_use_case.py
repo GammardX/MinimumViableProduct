@@ -29,7 +29,7 @@ class IAnalyzeSixHatsUseCase(ABC):
     """
     
     @abstractmethod
-    async def execute(
+    async def analyze_six_hats(
         self, 
         document: TextDocument, 
         hat: str

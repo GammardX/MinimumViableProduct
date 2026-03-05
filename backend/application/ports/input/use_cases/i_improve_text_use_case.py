@@ -21,7 +21,7 @@ class IImproveTextUseCase(ABC):
     """
     
     @abstractmethod
-    async def execute(
+    async def improve_text(
         self, 
         document: TextDocument, 
         criterion: str

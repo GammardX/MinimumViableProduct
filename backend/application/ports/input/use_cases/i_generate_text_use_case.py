@@ -21,7 +21,7 @@ class IGenerateTextUseCase(ABC):
     """
     
     @abstractmethod
-    async def execute(self, prompt: str) -> LLMResult:
+    async def generate_text(self, prompt: str) -> LLMResult:
         """
         Genera testo originale basato su prompt
         

@@ -21,7 +21,7 @@ class SummarizeTextService(ISummarizeTextUseCase):
         self._prompt_builder = prompt_builder
         self._response_parser = response_parser
     
-    async def execute(
+    async def summarize_text(
         self, 
         document: TextDocument, 
         percentage: int = 30
