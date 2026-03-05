@@ -27,7 +27,7 @@ def use_case(mocks):
 async def test_improve_empty_document(use_case):
     """Verifica che un documento vuoto restituisca INVALID_INPUT"""
     doc = TextDocument(content="   ")
-    result = await use_case.execute(doc)
+    result = await use_case.improve_text(doc)
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert result.code == ResultCode.EMPTY_TEXT
@@ -43,7 +43,7 @@ async def test_improve_criterion_fallback(use_case, mocks):
     mocks["llm"].generate_completion.return_value = "raw"
     
     # Eseguiamo con criterio vuoto
-    await use_case.execute(doc, criterion="  ")
+    await use_case.improve_text(doc, criterion="  ")
     
     # Verifichiamo che il builder sia stato chiamato con il default
     mocks["builder"].build_improve_prompt.assert_called_once_with(
@@ -61,7 +61,7 @@ async def test_improve_success_flow(use_case, mocks):
     expected = LLMResult(status=ResultStatus.SUCCESS, code=ResultCode.OK, rewritten_text="Poesia")
     mocks["parser"].parse_response.return_value = expected
     
-    result = await use_case.execute(doc, criterion=criterion)
+    result = await use_case.improve_text(doc, criterion=criterion)
     
     mocks["builder"].build_improve_prompt.assert_called_with(doc, criterion)
     assert result == expected
@@ -73,7 +73,7 @@ async def test_improve_llm_error_handling(use_case, mocks):
     mocks["builder"].build_improve_prompt.return_value = ["prompt"]
     mocks["llm"].generate_completion.side_effect = Exception("Errore di rete")
     
-    result = await use_case.execute(doc)
+    result = await use_case.improve_text(doc)
     
     assert result.status == ResultStatus.ERROR
     assert result.code == ResultCode.TECHNICAL_ERROR

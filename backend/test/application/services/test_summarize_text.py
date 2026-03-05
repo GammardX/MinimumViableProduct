@@ -29,7 +29,7 @@ def use_case(mocks):
 async def test_summarize_invalid_percentage_low(use_case):
     """Testa il limite inferiore della percentuale (9%)"""
     doc = TextDocument(content="Testo valido")
-    result = await use_case.execute(doc, percentage=9)
+    result = await use_case.summarize_text(doc, percentage=9)
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert "La percentuale deve essere tra 10 e 90" in result.violation_category
@@ -38,7 +38,7 @@ async def test_summarize_invalid_percentage_low(use_case):
 async def test_summarize_invalid_percentage_high(use_case):
     """Testa il limite superiore della percentuale (91%)"""
     doc = TextDocument(content="Testo valido")
-    result = await use_case.execute(doc, percentage=91)
+    result = await use_case.summarize_text(doc, percentage=91)
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert result.code == ResultCode.EMPTY_TEXT # Nota: il tuo codice usa EMPTY_TEXT anche qui
@@ -47,7 +47,7 @@ async def test_summarize_invalid_percentage_high(use_case):
 async def test_summarize_empty_document(use_case):
     """Verifica il comportamento con documento vuoto"""
     doc = TextDocument(content="   ")
-    result = await use_case.execute(doc, percentage=30)
+    result = await use_case.summarize_text(doc, percentage=30)
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert result.code == ResultCode.EMPTY_TEXT
@@ -63,7 +63,7 @@ async def test_summarize_success_flow(use_case, mocks):
     mocks["parser"].parse_response.return_value = expected
     
     # ACT
-    result = await use_case.execute(doc, percentage=50)
+    result = await use_case.summarize_text(doc, percentage=50)
     
     # ASSERT
     mocks["builder"].build_summarize_prompt.assert_called_once_with(doc, 50)
@@ -77,7 +77,7 @@ async def test_summarize_llm_exception(use_case, mocks):
     mocks["builder"].build_summarize_prompt.return_value = ["prompt"]
     mocks["llm"].generate_completion.side_effect = Exception("Timeout API")
     
-    result = await use_case.execute(doc)
+    result = await use_case.summarize_text(doc)
     
     assert result.status == ResultStatus.ERROR
     assert "Timeout API" in result.violation_category

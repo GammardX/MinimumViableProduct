@@ -26,7 +26,7 @@ def use_case(mocks):
 @pytest.mark.asyncio
 async def test_generate_empty_prompt_returns_invalid(use_case):
     """Verifica che un prompt vuoto o composto da soli spazi venga rifiutato"""
-    result = await use_case.execute(prompt="   ")
+    result = await use_case.generate_text(prompt="   ")
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert result.code == ResultCode.EMPTY_PROMPT
@@ -46,7 +46,7 @@ async def test_generate_success_with_context(use_case, mocks):
     mocks["parser"].parse_response.return_value = expected
     
     # ACT
-    result = await use_case.execute(prompt=prompt, context_text=context, word_count=words)
+    result = await use_case.generate_text(prompt=prompt, context_text=context, word_count=words)
     
     # ASSERT
     # Verifichiamo che il builder riceva tutti i parametri corretti
@@ -58,7 +58,7 @@ async def test_generate_uses_default_values(use_case, mocks):
     """Verifica che vengano usati i valori di default per contesto e word_count"""
     prompt = "Genera un'idea"
     
-    await use_case.execute(prompt=prompt)
+    await use_case.generate_text(prompt=prompt)
     
     # Il word_count di default nel tuo codice è 300
     mocks["builder"].build_generate_prompt.assert_called_once_with(prompt, "", 300)
@@ -69,7 +69,7 @@ async def test_generate_handles_llm_exception(use_case, mocks):
     mocks["builder"].build_generate_prompt.return_value = ["prompt"]
     mocks["llm"].generate_completion.side_effect = Exception("Quota API esaurita")
     
-    result = await use_case.execute(prompt="Test")
+    result = await use_case.generate_text(prompt="Test")
     
     assert result.status == ResultStatus.ERROR
     assert result.code == ResultCode.TECHNICAL_ERROR

@@ -27,7 +27,7 @@ def use_case(mocks):
 async def test_six_hats_invalid_hat_name(use_case):
     """Verifica che un cappello con nome errato (es. 'viola') venga rifiutato"""
     doc = TextDocument(content="Testo valido")
-    result = await use_case.execute(doc, hat="viola")
+    result = await use_case.analyze_six_hats(doc, hat="viola")
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert "non supportato" in result.violation_category
@@ -41,7 +41,7 @@ async def test_six_hats_case_insensitivity(use_case, mocks):
     mocks["parser"].parse_response.return_value = LLMResult(status=ResultStatus.SUCCESS, code=ResultCode.OK)
     
     # Test con maiuscole
-    result = await use_case.execute(doc, hat="ROSSO")
+    result = await use_case.analyze_six_hats(doc, hat="ROSSO")
     
     assert result.is_successful()
     # Verifichiamo che il builder sia stato chiamato (la logica passa la validazione)
@@ -51,7 +51,7 @@ async def test_six_hats_case_insensitivity(use_case, mocks):
 async def test_six_hats_empty_hat_returns_invalid(use_case):
     """Verifica che un cappello None o vuoto venga rifiutato"""
     doc = TextDocument(content="Testo")
-    result = await use_case.execute(doc, hat="")
+    result = await use_case.analyze_six_hats(doc, hat="")
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert "non supportato" in result.violation_category
@@ -67,7 +67,7 @@ async def test_six_hats_success_flow(use_case, mocks):
     expected = LLMResult(status=ResultStatus.SUCCESS, code=ResultCode.OK, rewritten_text="Analisi verde")
     mocks["parser"].parse_response.return_value = expected
     
-    result = await use_case.execute(doc, hat=hat)
+    result = await use_case.analyze_six_hats(doc, hat=hat)
     
     mocks["builder"].build_six_hats_prompt.assert_called_with(doc, hat)
     assert result == expected
@@ -79,7 +79,7 @@ async def test_six_hats_llm_exception(use_case, mocks):
     mocks["builder"].build_six_hats_prompt.return_value = ["prompt"]
     mocks["llm"].generate_completion.side_effect = Exception("LLM Down")
     
-    result = await use_case.execute(doc, hat="nero")
+    result = await use_case.analyze_six_hats(doc, hat="nero")
     
     assert result.status == ResultStatus.ERROR
     assert "LLM Down" in result.violation_category

@@ -21,7 +21,7 @@ async def test_translate_empty_document_returns_invalid(use_case):
     uc, _, _, _ = use_case
     doc = TextDocument(content="   ") # Documento vuoto
     
-    result = await uc.execute(doc, "en")
+    result = await uc.translate_text(doc, "en")
     
     assert result.status == ResultStatus.INVALID_INPUT
     assert result.code.value == "EMPTY_TEXT"
@@ -35,7 +35,7 @@ async def test_translate_llm_failure_returns_technical_error(use_case):
     # Simuliamo un errore di rete/API
     llm.generate_completion.side_effect = Exception("API Connection Timeout")
     
-    result = await uc.execute(doc, "en")
+    result = await uc.translate_text(doc, "en")
     
     assert result.status == ResultStatus.ERROR
     assert "API Connection Timeout" in result.violation_category
@@ -51,7 +51,7 @@ async def test_translate_full_flow_success(use_case):
     expected_final_result = LLMResult(status=ResultStatus.SUCCESS, code="OK", rewritten_text="Good morning")
     parser.parse_response.return_value = expected_final_result
     
-    result = await uc.execute(doc, "en")
+    result = await uc.translate_text(doc, "en")
     
     # Verifichiamo la catena di montaggio
     builder.build_translate_prompt.assert_called_once()
