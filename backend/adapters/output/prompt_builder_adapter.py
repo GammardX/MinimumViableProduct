@@ -286,7 +286,7 @@ class PromptBuilderAdapter(IPromptBuilder):
         - FORMATTAZIONE OBBLIGATORIA: DEVI strutturare il testo usando il Markdown in modo ricco. Usa titoli (##, ###) per dividere le sezioni, liste puntate o numerate per elencare i punti chiave, e usa il **grassetto** per evidenziare i concetti più importanti. Non restituire un muro di testo continuo.
         - STRICT OUTPUT: Rispondi SOLO con il testo generato inserito nel JSON. NON aggiungere introduzioni (es. "Ecco il testo:"). ASSOLUTAMENTE NON aggiungere note finali, disclaimer, conclusioni o commenti sul fatto che hai usato il Markdown o su quale lingua hai scelto (es. "Nota: Il testo è stato scritto in..."). Il testo deve contenere solo il contenuto richiesto, pronto per essere inserito in un documento.
         - Per scrivere sezioni di codice di programmazione usa i caratteri: ``` ``` non ` `. Subito dopo il carattere ```, inserisci il linguaggio di programmazione utilizzato, poi vai a capo e scrivi il codice. Esempio: 
-        ```js
+        ```javascript
         let i=0;
         function ciao()
         ```
