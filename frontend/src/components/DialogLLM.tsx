@@ -5,117 +5,135 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import 'easymde/dist/easymde.min.css';
+import 'highlight.js/styles/vs.css';
+import { marked } from 'marked';
+import '../style/md-editor.css';
 
 interface DialogLLMProps {
-    text: string;
-    open: boolean;
-    loading: boolean;
-    actionType?: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate'; 
-    hasSelection?: boolean; 
-    onClose: () => void;
-    onCancel?: () => void;
-    onCopySuccess?: () => void;
-    onReplace?: () => void;
-    onInsertBelow?: () => void; 
-    onCreateNewNote?: () => void;
+	text: string;
+	open: boolean;
+	loading: boolean;
+	actionType?: 'insert' | 'analysis' | 'summary' | 'improve' | 'translate';
+	hasSelection?: boolean;
+	onClose: () => void;
+	onCancel?: () => void;
+	onCopySuccess?: () => void;
+	onReplace?: () => void;
+	onInsertBelow?: () => void;
+	onCreateNewNote?: () => void;
 }
 
 export default function DialogLLM({
-    text,
-    open,
-    loading,
-    actionType = 'insert',
-    hasSelection = false,
-    onClose,
-    onCancel,
-    onCopySuccess,
-    onReplace,
-    onInsertBelow,
-    onCreateNewNote 
+	text,
+	open,
+	loading,
+	actionType = 'insert',
+	hasSelection = false,
+	onClose,
+	onCancel,
+	onCopySuccess,
+	onReplace,
+	onInsertBelow,
+	onCreateNewNote
 }: DialogLLMProps) {
-    const isInvalidResult = 
-        text === "Generazione annullata dall'utente." || 
-        text.startsWith("Errore") || 
-        text.startsWith("Richiesta rifiutata") || 
-        text.startsWith("Input non valido") ||
-        text === "Nessun testo generato.";
+	const isInvalidResult =
+		text === "Generazione annullata dall'utente." ||
+		text.startsWith('Errore') ||
+		text.startsWith('Richiesta rifiutata') ||
+		text.startsWith('Input non valido') ||
+		text === 'Nessun testo generato.';
 
-    const handleCopy = () => {
-        if (!text || isInvalidResult) return; 
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                if (onCopySuccess) onCopySuccess();
-            })
-            .catch(err => {
-                console.error("Errore durante la copia:", err);
-            });
-    };
+	const handleCopy = () => {
+		if (!text || isInvalidResult) return;
+		navigator.clipboard
+			.writeText(text)
+			.then(() => {
+				if (onCopySuccess) onCopySuccess();
+			})
+			.catch((err) => {
+				console.error('Errore durante la copia:', err);
+			});
+	};
 
-    return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle>Risultato LLM</DialogTitle>
+	return (
+		<Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
+			<DialogTitle>Risultato LLM</DialogTitle>
 
-            <DialogContent 
-                dividers 
-                className={`dialog-content-custom ${loading ? 'is-loading' : ''}`}
-            >
-                {loading ? (
-                    <div className="dialog-loading-box"> 
-                        <CircularProgress size={24} />
-                        <DialogContentText className="dialog-loading-text">
-                            LLM sta generando la risposta…
-                        </DialogContentText>
-                    </div>
-                ) : (
-                    <DialogContentText className="dialog-text-pre"> 
-                        {text || 'Nessun risultato'}
-                    </DialogContentText>
-                )}
-            </DialogContent>
+			<DialogContent
+				dividers
+				className={`dialog-content-custom ${loading ? 'is-loading' : ''}`}>
+				{loading ? (
+					<div className='dialog-loading-box'>
+						<CircularProgress size={24} />
+						<DialogContentText className='dialog-loading-text'>
+							LLM sta generando la risposta…
+						</DialogContentText>
+					</div>
+				) : (
+					<div className='editor-preview-side editor-preview editor-preview-active-side dialog-preview'>
+						{text ? (
+							<div dangerouslySetInnerHTML={{ __html: marked.parse(text) }} />
+						) : (
+							'Nessun risultato'
+						)}
+					</div>
+				)}
+			</DialogContent>
 
-            <DialogActions>
-                {loading ? (
-                    <Button onClick={onCancel} color="error">
-                        Annulla
-                    </Button>
-                ) : (
-                    <>
-                        {!isInvalidResult && actionType === 'insert' && (
-                            <>
-                                {hasSelection ? (
-                                    <>
-                                        <Button onClick={onReplace} variant="outlined" disabled={!text}>
-                                            Sostituisci Testo
-                                        </Button>
-                                        <Button onClick={onInsertBelow} variant="contained" disabled={!text}>
-                                            Inserisci Sotto
-                                        </Button>
-                                    </>
-                                ) : (
-                                    <Button onClick={onReplace} variant="contained" disabled={!text}>
-                                        Inserisci Testo
-                                    </Button>
-                                )}
-                            </>
-                        )}
-                        
-                        {!isInvalidResult && actionType !== 'insert' && onCreateNewNote && (
-                            <Button onClick={onCreateNewNote} variant="contained" disabled={!text}>
-                                Salva come nota
-                            </Button>
-                        )}
+			<DialogActions>
+				{loading ? (
+					<Button onClick={onCancel} color='error'>
+						Annulla
+					</Button>
+				) : (
+					<>
+						{!isInvalidResult && actionType === 'insert' && (
+							<>
+								{hasSelection ? (
+									<>
+										<Button
+											onClick={onReplace}
+											variant='outlined'
+											disabled={!text}>
+											Sostituisci Testo
+										</Button>
+										<Button
+											onClick={onInsertBelow}
+											variant='contained'
+											disabled={!text}>
+											Inserisci Sotto
+										</Button>
+									</>
+								) : (
+									<Button
+										onClick={onReplace}
+										variant='contained'
+										disabled={!text}>
+										Inserisci Testo
+									</Button>
+								)}
+							</>
+						)}
 
-                        {!isInvalidResult && (
-                            <Button onClick={handleCopy} disabled={!text}>
-                                Copia
-                            </Button>
-                        )}
-                        <Button onClick={onClose}>
-                            Chiudi
-                        </Button>
-                    </>
-                )}
-            </DialogActions>
-        </Dialog>
-    );
+						{!isInvalidResult && actionType !== 'insert' && onCreateNewNote && (
+							<Button
+								onClick={onCreateNewNote}
+								variant='contained'
+								disabled={!text}>
+								Salva come nota
+							</Button>
+						)}
+
+						{!isInvalidResult && (
+							<Button onClick={handleCopy} disabled={!text}>
+								Copia
+							</Button>
+						)}
+						<Button onClick={onClose}>Chiudi</Button>
+					</>
+				)}
+			</DialogActions>
+		</Dialog>
+	);
 }

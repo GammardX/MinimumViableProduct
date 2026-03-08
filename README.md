@@ -56,3 +56,22 @@ Run test:
 npm run test
 ```
 
+
+## Setup Frontend Unit Tests (no docker needed)
+
+Andare nella root:
+
+Install dependencies:
+```bash
+pip install pytest
+```
+
+Run test:
+```bash
+pytest backend/test/integration
+```
+or
+```bash
+python -m pytest backend/test/integration
+```
+
