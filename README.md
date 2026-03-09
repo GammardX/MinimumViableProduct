@@ -41,7 +41,37 @@ Nel terminale premere Ctrl+C oppure "docker compose down"
 
 ## Setup Frontend Unit Tests (no docker needed)
 
-Install dependencies:
+Andare nella cartella frontend:
+```bash
+cd frontend
+```
 
+Install dependencies:
 ```bash
 npm install
+```
+
+Run test:
+```bash
+npm run test
+```
+
+
+## Setup Frontend Unit Tests (no docker needed)
+
+Andare nella root:
+
+Install dependencies:
+```bash
+pip install pytest
+```
+
+Run test:
+```bash
+pytest backend/test/integration
+```
+or
+```bash
+python -m pytest backend/test/integration
+```
+

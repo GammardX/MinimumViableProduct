@@ -82,6 +82,7 @@ describe('MarkdownEditor', () => {
         lineCount: () => 5,
         setSelection,
         focus,
+        getTokenTypeAt: () => 'header',
       },
     } as any);
 
@@ -92,6 +93,7 @@ describe('MarkdownEditor', () => {
         lineCount: () => 1,
         setSelection,
         focus,
+        getTokenTypeAt: () => null,
       },
     } as any);
 
