@@ -142,7 +142,7 @@ test('Salvataggio Nota (Successo e Fallimento)', async ({ page }) => {
   const downloadPromise = page.waitForEvent('download');
   await page.locator('.btn-icon[title="Salva nota su disco"]').click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/\\.md$/);
+  expect(download.suggestedFilename()).toMatch(/\.md$/);
   await expect(page.locator('.status-left')).toContainText('parole');
 });
 
