@@ -6,11 +6,21 @@ import textwrap
 from typing import List, Dict
 from application.ports.output import IPromptBuilder
 from domain.models import TextDocument
+from .hat_strategies.i_hat_strategy import IHatStrategy
 
+from .hat_strategies.white_hat_strategy import WhiteHatStrategy
+from .hat_strategies.blue_hat_strategy import BlueHatStrategy
+from .hat_strategies.red_hat_strategy import RedHatStrategy
+from .hat_strategies.yellow_hat_strategy import YellowHatStrategy
+from .hat_strategies.black_hat_strategy import BlackHatStrategy
+from .hat_strategies.green_hat_strategy import GreenHatStrategy
 
 class PromptBuilderAdapter(IPromptBuilder):
     """Adapter per costruzione prompt con logica di sicurezza"""
     
+    def __init__(self):
+        self._hat_strategy: IHatStrategy = None
+
     def build_summarize_prompt(
         self, 
         document: TextDocument, 
@@ -169,48 +179,20 @@ class PromptBuilderAdapter(IPromptBuilder):
         """Costruisce il prompt per analisi sei cappelli"""
         
         hat_key = hat.lower()
-        
-        hat_instructions = {
-            "bianco": (
-                "OBIETTIVO: Analisi puramente informativa e neutrale.\n"
-                "- Elenca ESCLUSIVAMENTE i fatti e i dati presenti nel testo.\n"
-                "- Identifica quali informazioni mancano per avere un quadro completo.\n"
-                "- Valuta se il testo cita fonti reali o sembra inventato/generico.\n"
-                "- NON esprimere opinioni o emozioni."
-            ),
-            "rosso": (
-                "OBIETTIVO: Reazione emotiva e istintiva.\n"
-                "- Che emozioni suscita questo testo? (Rabbia, entusiasmo, noia, paura?)\n"
-                "- Qual è la tua intuizione immediata sulla validità del contenuto?\n"
-                "- Non giustificare le tue reazioni, esprimile e basta."
-            ),
-            "nero": (
-                "OBIETTIVO: Cautela, rischi e giudizio critico.\n"
-                "- Quali sono i punti deboli, le fallacie logiche o gli errori nel testo?\n"
-                "- Quali sono i rischi nell'applicare ciò che dice il testo?\n"
-                "- Fai l'avvocato del diavolo: perché questo testo potrebbe essere sbagliato o dannoso?"
-            ),
-            "giallo": (
-                "OBIETTIVO: Ottimismo, benefici e valore.\n"
-                "- Quali sono i punti di forza e i vantaggi descritti?\n"
-                "- Quale valore positivo si può estrarre da questo testo?\n"
-                "- Cerca la logica positiva: perché questa idea potrebbe funzionare?"
-            ),
-            "verde": (
-                "OBIETTIVO: Creatività e alternative.\n"
-                "- Come si potrebbe migliorare o espandere questo testo?\n"
-                "- Ci sono soluzioni alternative o idee laterali che il testo non considera?\n"
-                "- Proponi un approccio diverso allo stesso argomento."
-            ),
-            "blu": (
-                "OBIETTIVO: Organizzazione e sintesi (Metacognizione).\n"
-                "- Riassumi la struttura del testo (è logica? è confusa?).\n"
-                "- Quali sono i prossimi passi logici o le conclusioni operative?\n"
-                "- Definisci l'agenda per l'uso di queste informazioni."
-            )
-        }
+        if(hat_key=="bianco"):
+            self._hat_strategy=WhiteHatStrategy()
+        elif(hat_key=="rosso"):
+            self._hat_strategy=RedHatStrategy()
+        elif(hat_key=="nero"):
+            self._hat_strategy=BlackHatStrategy()
+        elif(hat_key=="giallo"):
+            self._hat_strategy=YellowHatStrategy()
+        elif(hat_key=="verde"):
+            self._hat_strategy=GreenHatStrategy()
+        elif(hat_key=="blu"):
+            self._hat_strategy=BlueHatStrategy()
 
-        instruction = hat_instructions.get(hat_key, "")
+        instruction = self._hat_strategy.build_instruction()
 
         system_content = textwrap.dedent(f"""
         Sei un analista esperto che utilizza il metodo dei "Sei Cappelli per pensare".
