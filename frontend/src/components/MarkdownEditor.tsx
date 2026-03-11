@@ -138,7 +138,14 @@ export default function MarkdownEditor({
                 },
                 {
                     name: "table",
-                    action: EasyMDE.drawTable,
+                    action: (editor: EasyMDE) => {
+                        const cm = editor.codemirror;
+                        const cursor = cm.getCursor();
+                        const tableTemplate = "\n\n| Colonna 1 | Colonna 2 | Colonna 3 |\n| -------- | -------- | -------- |\n| Cella 1 | Cella 2 | Cella 3 |\n\n";
+                        cm.replaceRange(tableTemplate, cursor);
+                        cm.setCursor({ line: cursor.line, ch: 1000 });
+                        cm.focus();
+                    },
                     className: "fa fa-table",
                     title: "Tabella",
                 },
