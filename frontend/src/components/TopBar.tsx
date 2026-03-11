@@ -287,7 +287,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
         fullWidth
         maxWidth='sm'>
         <DialogTitle>
-          {isEditingAI ? 'Modifica testo generato' : 'Cosa vuoi scrivere?'}
+          {isEditingAI ? 'Modifica testo generato' : 'Che cosa vuoi scrivere?'}
         </DialogTitle>
         <DialogContent
           sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
