@@ -63,7 +63,7 @@ class PromptBuilderAdapter(IPromptBuilder):
             {"role": "system", "content": system_content},
             {"role": "user", "content": user_content}
         ]
-    
+     
     def build_improve_prompt(
         self, 
         document: TextDocument, 
