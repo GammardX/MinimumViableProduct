@@ -15,11 +15,17 @@ from .hat_strategies.yellow_hat_strategy import YellowHatStrategy
 from .hat_strategies.black_hat_strategy import BlackHatStrategy
 from .hat_strategies.green_hat_strategy import GreenHatStrategy
 
+_HAT_STRATEGIES: Dict[str, IHatStrategy] = {
+        "bianco": WhiteHatStrategy(),
+        "rosso":  RedHatStrategy(),
+        "nero":   BlackHatStrategy(),
+        "giallo": YellowHatStrategy(),
+        "verde":  GreenHatStrategy(),
+        "blu":    BlueHatStrategy(),
+    }
+
 class PromptBuilderAdapter(IPromptBuilder):
     """Adapter per costruzione prompt con logica di sicurezza"""
-    
-    def __init__(self):
-        self._hat_strategy: IHatStrategy = None
 
     def build_summarize_prompt(
         self, 
@@ -178,21 +184,9 @@ class PromptBuilderAdapter(IPromptBuilder):
     ) -> List[Dict[str, str]]:
         """Costruisce il prompt per analisi sei cappelli"""
         
-        hat_key = hat.lower()
-        if(hat_key=="bianco"):
-            self._hat_strategy=WhiteHatStrategy()
-        elif(hat_key=="rosso"):
-            self._hat_strategy=RedHatStrategy()
-        elif(hat_key=="nero"):
-            self._hat_strategy=BlackHatStrategy()
-        elif(hat_key=="giallo"):
-            self._hat_strategy=YellowHatStrategy()
-        elif(hat_key=="verde"):
-            self._hat_strategy=GreenHatStrategy()
-        elif(hat_key=="blu"):
-            self._hat_strategy=BlueHatStrategy()
+        strategy = _HAT_STRATEGIES.get(hat.lower())
 
-        instruction = self._hat_strategy.build_instruction()
+        instruction = strategy.build_instruction()
 
         system_content = textwrap.dedent(f"""
         Sei un analista esperto che utilizza il metodo dei "Sei Cappelli per pensare".
