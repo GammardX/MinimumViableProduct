@@ -148,7 +148,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /^Genera$/ }));
 
     await waitFor(() => {
-      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o nell\'input.');
     });
   });
 
@@ -245,7 +245,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
     await waitFor(() => {
-      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o nell\'input.');
     });
   });
 
@@ -275,7 +275,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
     await waitFor(() => {
-      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o nell\'input.');
     });
   });
 
@@ -305,7 +305,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
     await waitFor(() => expect(mockedTranslate).toHaveBeenCalled());
-    expect(llm.setDialogResult).not.toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+    expect(llm.setDialogResult).not.toHaveBeenCalledWith('Errore di connessione o nell\'input.');
   });
 
   it('la traduzione gestisce gli errori non di interruzione', async () => {
@@ -320,7 +320,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /Applica/i }));
 
     await waitFor(() => {
-      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o nell\'input.');
     });
   });
 
@@ -349,7 +349,7 @@ describe('TopBar', () => {
     await user.click(screen.getByRole('button', { name: /Rosso: Emozioni/i }));
 
     await waitFor(() => {
-      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o parsing durante la generazione.');
+      expect(llm.setDialogResult).toHaveBeenCalledWith('Errore di connessione o nell\'input.');
     });
   });
 

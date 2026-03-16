@@ -115,7 +115,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         llm.setDialogResult(
-          'Errore di connessione o parsing durante la generazione.'
+          'Errore di connessione o nell\'input.'
         );
       }
     }
@@ -149,7 +149,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         llm.setDialogResult(
-          'Errore di connessione o parsing durante la generazione.'
+          'Errore di connessione o nell\'input.'
         );
       }
     }
@@ -179,7 +179,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         llm.setDialogResult(
-          'Errore di connessione o parsing durante la generazione.'
+          'Errore di connessione o nell\'input.'
         );
       }
     }
@@ -209,7 +209,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
     } catch (error: any) {
       if (error.name !== 'AbortError') {
         llm.setDialogResult(
-          'Errore di connessione o parsing durante la generazione.'
+          'Errore di connessione o nell\'input.'
         );
       }
     }
@@ -266,7 +266,7 @@ export default function TopBar({ title, aiHistory, llm }: TopBarProps) {
                 } catch (error: any) {
                   if (error.name !== 'AbortError') {
                     llm.setDialogResult(
-                      'Errore di connessione o parsing durante la generazione.'
+                      'Errore di connessione o nell\'input.'
                     );
                   }
                 }
